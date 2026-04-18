@@ -46,14 +46,13 @@ async function callGemini(apiKey, prompt, { timeoutMs } = {}) {
   }, timeoutMs);
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) {
-    // Could be a safety block — surface what we know
     const reason = data?.candidates?.[0]?.finishReason || 'empty response';
     throw new Error(`gemini: ${reason}`);
   }
   return text;
 }
 
-// ── OpenAI-compatible helper ─────────────────────────────────────────────────
+// ── OpenAI-compatible helper (Mistral, Groq, OpenAI) ────────────────────────
 async function callOpenAICompat({ url, apiKey, model, prompt, extraHeaders = {}, jsonMode = true, timeoutMs }) {
   const body = {
     model,
@@ -101,40 +100,12 @@ async function callGroq(apiKey, prompt, opts = {}) {
   });
 }
 
-async function callOpenRouter(apiKey, prompt, opts = {}) {
-  // JSON mode support on OpenRouter varies per model — for free-tier models
-  // we rely on prompt discipline + our fallback prose scanner.
-  return callOpenAICompat({
-    ...opts,
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    apiKey,
-    model: 'qwen/qwen3-next-80b-a3b-instruct:free',
-    prompt,
-    jsonMode: false,
-    extraHeaders: {
-      'HTTP-Referer': 'https://github.com/crazyhoesl/PPDF',
-      'X-Title': 'PPDF',
-    },
-  });
-}
-
-async function callCerebras(apiKey, prompt, opts = {}) {
-  return callOpenAICompat({
-    ...opts,
-    url: 'https://api.cerebras.ai/v1/chat/completions',
-    apiKey,
-    model: 'llama-4-scout-17b-16e-instruct',
-    prompt,
-    jsonMode: true,
-  });
-}
-
 async function callOpenAI(apiKey, prompt, opts = {}) {
   return callOpenAICompat({
     ...opts,
     url: 'https://api.openai.com/v1/chat/completions',
     apiKey,
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.4',
     prompt,
     jsonMode: true,
   });
@@ -146,7 +117,7 @@ async function callOpenAI(apiKey, prompt, opts = {}) {
 // prose fallback in the caller.
 async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
   const body = {
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-opus-4-7',
     max_tokens: 800,
     temperature: 0,
     messages: [{ role: 'user', content: prompt }],
@@ -161,7 +132,6 @@ async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
     body: JSON.stringify(body),
   }, timeoutMs);
 
-  // content is an array of blocks; grab text blocks
   const blocks = Array.isArray(data?.content) ? data.content : [];
   const text = blocks.filter(b => b?.type === 'text').map(b => b.text).join('\n').trim();
   const stop = data?.stop_reason;
@@ -192,30 +162,16 @@ export const providers = [
     call: callGroq,
   },
   {
-    id: 'openrouter',
-    name: 'OpenRouter',
-    model: 'qwen3-next-80b:free',
-    envKey: 'OPENROUTER_API_KEY',
-    call: callOpenRouter,
-  },
-  {
-    id: 'cerebras',
-    name: 'Cerebras',
-    model: 'llama-4-scout-17b-16e-instruct',
-    envKey: 'CEREBRAS_API_KEY',
-    call: callCerebras,
-  },
-  {
     id: 'openai',
     name: 'OpenAI',
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.4',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
   },
   {
     id: 'claude',
     name: 'Anthropic Claude',
-    model: 'claude-haiku-4-5',
+    model: 'claude-opus-4-7',
     envKey: 'CLAUDE_API_KEY',
     call: callClaude,
   },
