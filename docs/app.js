@@ -32,6 +32,15 @@ const CANDIDATES = {
 function candidateInfo(id) { return CANDIDATES[id] || CANDIDATES.unknown; }
 function isRealCandidate(id) { return id && id !== 'no_opinion' && id !== 'unknown'; }
 
+// Provider IDs we want displayed. Historical snapshots may contain retired
+// providers (openrouter, cerebras); those are filtered out of every UI view.
+const ACTIVE_PROVIDERS = ['gemini', 'mistral', 'groq', 'openai', 'claude'];
+function isActiveProvider(id) { return ACTIVE_PROVIDERS.includes(id); }
+/** Returns the subset of results in a snapshot that come from active providers. */
+function activeResults(snapshot) {
+  return (snapshot?.results || []).filter(r => isActiveProvider(r.provider));
+}
+
 // ── Wikipedia image fetching with in-memory + localStorage cache ─────
 const imageCache = {};
 function getCandidateImage(wikiSlug) {
@@ -175,7 +184,7 @@ async function loadData() {
 // ── Consensus (the "headline answer") ────────────────────────────────
 function computeConsensus(snapshot) {
   if (!snapshot?.results?.length) return null;
-  const okResults = snapshot.results.filter(r => r.ok);
+  const okResults = activeResults(snapshot).filter(r => r.ok);
   if (!okResults.length) return null;
 
   const counts = {};
@@ -276,7 +285,7 @@ function renderLatest(snapshot) {
   meta.textContent = `${t('last_updated')}: ${fmt.format(dt)}`;
 
   grid.innerHTML = '';
-  snapshot.results.forEach((r, idx) => {
+  activeResults(snapshot).forEach((r, idx) => {
     const card = document.createElement('div');
     card.className = 'provider-card';
 
@@ -368,7 +377,7 @@ function renderConsensusChart() {
   const seenCandidates = new Set();
   for (const day of days) {
     const snap = byDay[day];
-    const okResults = (snap.results || []).filter(r => r.ok);
+    const okResults = activeResults(snap).filter(r => r.ok);
     const total = okResults.length;
     const counts = {};
     for (const r of okResults) {
@@ -384,7 +393,7 @@ function renderConsensusChart() {
   for (const id of seenCandidates) {
     series[id] = days.map(day => {
       const snap = byDay[day];
-      const ok = (snap.results || []).filter(r => r.ok);
+      const ok = activeResults(snap).filter(r => r.ok);
       const total = ok.length;
       const count = ok.filter(r => (r.candidate_id || 'unknown') === id).length;
       return {
@@ -559,7 +568,7 @@ function renderTimeline() {
   const providerNames = {};
   const providerModels = {};
   for (const snap of allSnapshots) {
-    for (const r of (snap.results || [])) {
+    for (const r of activeResults(snap)) {
       if (!providerIds.includes(r.provider)) providerIds.push(r.provider);
       providerNames[r.provider] = r.name;
       providerModels[r.provider] = r.model;
@@ -584,7 +593,7 @@ function renderTimeline() {
     track.className = 'tl-track';
 
     for (const snap of allSnapshots) {
-      const result = (snap.results || []).find(r => r.provider === pid);
+      const result = activeResults(snap).find(r => r.provider === pid);
       if (!result || !result.ok) continue;
       const cand = candidateInfo(result.candidate_id || 'unknown');
       const pointTime = new Date(snap.timestamp).getTime();
@@ -655,7 +664,7 @@ function renderTally() {
   const counts = {};
   let total = 0;
   for (const snap of allSnapshots) {
-    for (const r of (snap.results || [])) {
+    for (const r of activeResults(snap)) {
       if (!r.ok) continue;
       const id = r.candidate_id || 'unknown';
       counts[id] = (counts[id] || 0) + 1;
