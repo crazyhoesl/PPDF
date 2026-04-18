@@ -9,28 +9,77 @@
 const TARGET = new Date('2027-04-25T18:00:00Z'); // 20:00 Paris CEST
 
 const CANDIDATES = {
-  bardella:   { name: 'Jordan Bardella',     party: 'RN',          color: '#0d3b72' },
-  lepen:      { name: 'Marine Le Pen',       party: 'RN',          color: '#13477a' },
-  philippe:   { name: 'Édouard Philippe',    party: 'Horizons',    color: '#1e88e5' },
-  attal:      { name: 'Gabriel Attal',       party: 'Renaissance', color: '#8b5cf6' },
-  darmanin:   { name: 'Gérald Darmanin',     party: 'Renaissance', color: '#a78bfa' },
-  lecornu:    { name: 'Sébastien Lecornu',   party: 'Renaissance', color: '#b794f4' },
-  retailleau: { name: 'Bruno Retailleau',    party: 'LR',          color: '#0ea5e9' },
-  wauquiez:   { name: 'Laurent Wauquiez',    party: 'LR',          color: '#38bdf8' },
-  melenchon:  { name: 'Jean-Luc Mélenchon',  party: 'LFI',         color: '#dc2626' },
-  glucksmann: { name: 'Raphaël Glucksmann',  party: 'PP/PS',       color: '#f472b6' },
-  faure:      { name: 'Olivier Faure',       party: 'PS',          color: '#ec4899' },
-  ruffin:     { name: 'François Ruffin',     party: 'Debout!',     color: '#f59e0b' },
-  tondelier:  { name: 'Marine Tondelier',    party: 'EÉLV',        color: '#16a34a' },
-  zemmour:    { name: 'Éric Zemmour',        party: 'Reconquête',  color: '#4b5563' },
-  marechal:   { name: 'Marion Maréchal',     party: 'IDL',         color: '#6b7280' },
-  macron:     { name: 'Emmanuel Macron',     party: 'Renaissance', color: '#7c3aed' },
+  bardella:   { name: 'Jordan Bardella',     party: 'RN',          color: '#0d3b72', wiki: 'Jordan_Bardella' },
+  lepen:      { name: 'Marine Le Pen',       party: 'RN',          color: '#13477a', wiki: 'Marine_Le_Pen' },
+  philippe:   { name: 'Édouard Philippe',    party: 'Horizons',    color: '#1e88e5', wiki: '%C3%89douard_Philippe' },
+  attal:      { name: 'Gabriel Attal',       party: 'Renaissance', color: '#8b5cf6', wiki: 'Gabriel_Attal' },
+  darmanin:   { name: 'Gérald Darmanin',     party: 'Renaissance', color: '#a78bfa', wiki: 'G%C3%A9rald_Darmanin' },
+  lecornu:    { name: 'Sébastien Lecornu',   party: 'Renaissance', color: '#b794f4', wiki: 'S%C3%A9bastien_Lecornu' },
+  retailleau: { name: 'Bruno Retailleau',    party: 'LR',          color: '#0ea5e9', wiki: 'Bruno_Retailleau' },
+  wauquiez:   { name: 'Laurent Wauquiez',    party: 'LR',          color: '#38bdf8', wiki: 'Laurent_Wauquiez' },
+  melenchon:  { name: 'Jean-Luc Mélenchon',  party: 'LFI',         color: '#dc2626', wiki: 'Jean-Luc_M%C3%A9lenchon' },
+  glucksmann: { name: 'Raphaël Glucksmann',  party: 'PP/PS',       color: '#f472b6', wiki: 'Rapha%C3%ABl_Glucksmann' },
+  faure:      { name: 'Olivier Faure',       party: 'PS',          color: '#ec4899', wiki: 'Olivier_Faure' },
+  ruffin:     { name: 'François Ruffin',     party: 'Debout!',     color: '#f59e0b', wiki: 'Fran%C3%A7ois_Ruffin' },
+  tondelier:  { name: 'Marine Tondelier',    party: 'EÉLV',        color: '#16a34a', wiki: 'Marine_Tondelier' },
+  zemmour:    { name: 'Éric Zemmour',        party: 'Reconquête',  color: '#4b5563', wiki: '%C3%89ric_Zemmour' },
+  marechal:   { name: 'Marion Maréchal',     party: 'IDL',         color: '#6b7280', wiki: 'Marion_Mar%C3%A9chal' },
+  macron:     { name: 'Emmanuel Macron',     party: 'Renaissance', color: '#7c3aed', wiki: 'Emmanuel_Macron' },
   no_opinion: { name: 'No opinion',          party: '—',           color: '#52525b' },
   unknown:    { name: 'Unrecognized',        party: '—',           color: '#64748b' },
 };
 
 function candidateInfo(id) { return CANDIDATES[id] || CANDIDATES.unknown; }
 function isRealCandidate(id) { return id && id !== 'no_opinion' && id !== 'unknown'; }
+
+// ── Wikipedia image fetching with in-memory + localStorage cache ─────
+const imageCache = {};
+function getCandidateImage(wikiSlug) {
+  if (!wikiSlug) return Promise.resolve(null);
+  if (imageCache[wikiSlug]) return imageCache[wikiSlug];
+
+  // Check localStorage cache (persists for 7 days)
+  const cacheKey = `ppdf-img-${wikiSlug}`;
+  try {
+    const stored = localStorage.getItem(cacheKey);
+    if (stored) {
+      const { url, t } = JSON.parse(stored);
+      if (Date.now() - t < 7 * 86400_000) {
+        imageCache[wikiSlug] = Promise.resolve(url);
+        return imageCache[wikiSlug];
+      }
+    }
+  } catch {}
+
+  imageCache[wikiSlug] = (async () => {
+    try {
+      const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${wikiSlug}&prop=pageimages&format=json&pithumbsize=200&origin=*`;
+      const res = await fetch(apiUrl);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const pages = data?.query?.pages;
+      if (!pages) return null;
+      const firstPage = Object.values(pages)[0];
+      const url = firstPage?.thumbnail?.source || null;
+      try { localStorage.setItem(cacheKey, JSON.stringify({ url, t: Date.now() })); } catch {}
+      return url;
+    } catch {
+      return null;
+    }
+  })();
+  return imageCache[wikiSlug];
+}
+
+/** Apply image to an element once the fetch resolves. */
+function attachCandidateImage(el, cand, dotStyle) {
+  if (!el || !cand?.wiki) return;
+  getCandidateImage(cand.wiki).then(url => {
+    if (!url) return;
+    // Replace the element's innerHTML with an img element
+    el.innerHTML = `<img src="${url}" alt="${cand.name}" loading="lazy" class="candidate-img-inner">`;
+    el.classList.add('has-image');
+  });
+}
 
 // ── State ────────────────────────────────────────────────────────────
 let currentLang = window.PPDF_DETECT_LANG();
@@ -186,18 +235,19 @@ function renderConsensus(snapshot) {
     el.innerHTML = `
       <div class="consensus-label">${t('consensus_today')}</div>
       <div class="consensus-name" style="--cand-color: ${cand.color}">
-        <span class="candidate-dot-big" style="background: ${cand.color}"></span>${escapeHtml(cand.name)}
+        <span class="candidate-avatar candidate-avatar-lg" id="consensusAvatar" style="background: ${cand.color}; border-color: ${cand.color}"></span>${escapeHtml(cand.name)}
       </div>
       <div class="consensus-meta">${partyPrefix}${escapeHtml(countText)}</div>
     `;
+    attachCandidateImage(document.getElementById('consensusAvatar'), cand);
     return;
   }
 
   // Tie — render each tied candidate
-  const items = consensus.ids.map(id => {
+  const items = consensus.ids.map((id, i) => {
     const cand = candidateInfo(id);
     return `<div class="consensus-tied-item" style="color: ${cand.color}">
-      <span class="candidate-dot-big" style="background: ${cand.color}"></span>${escapeHtml(cand.name)}
+      <span class="candidate-avatar candidate-avatar-md" id="consensusTieAvatar${i}" style="background: ${cand.color}; border-color: ${cand.color}"></span>${escapeHtml(cand.name)}
     </div>`;
   }).join('');
   el.innerHTML = `
@@ -205,6 +255,9 @@ function renderConsensus(snapshot) {
     <div class="consensus-tied">${items}</div>
     <div class="consensus-meta">${escapeHtml(countText)}</div>
   `;
+  consensus.ids.forEach((id, i) => {
+    attachCandidateImage(document.getElementById(`consensusTieAvatar${i}`), candidateInfo(id));
+  });
 }
 
 // ── Latest grid ──────────────────────────────────────────────────────
@@ -223,14 +276,10 @@ function renderLatest(snapshot) {
   meta.textContent = `${t('last_updated')}: ${fmt.format(dt)}`;
 
   grid.innerHTML = '';
-  for (const r of snapshot.results) {
+  snapshot.results.forEach((r, idx) => {
     const card = document.createElement('div');
     card.className = 'provider-card';
 
-    // Three display states:
-    //   - !ok              → error card
-    //   - candidate_id is "no_opinion" → model declined
-    //   - otherwise → real or unrecognized candidate
     const cand = candidateInfo(r.candidate_id || 'unknown');
     const isNoOpinion = r.candidate_id === 'no_opinion';
     const isUnknown = r.candidate_id === 'unknown';
@@ -251,23 +300,29 @@ function renderLatest(snapshot) {
                       : 'ok';
 
     const confLabel = r.confidence ? t('conf_' + r.confidence) : '—';
-    const dotStyle = isNoOpinion
-      ? `background: transparent; border: 2px solid ${cand.color}`
-      : `background: ${cand.color}`;
-
     const showParty = r.ok && isRealCandidate(r.candidate_id);
+    const avatarId = `cardAvatar-${idx}`;
+    const avatarBg = isNoOpinion ? 'transparent' : cand.color;
+
+    const avatarHtml = r.ok
+      ? `<span class="candidate-avatar candidate-avatar-sm" id="${avatarId}" style="background: ${avatarBg}; border-color: ${cand.color}"></span>`
+      : '';
 
     card.innerHTML = `
       <div class="provider-head">
-        <div class="provider-name">${escapeHtml(r.name)}</div>
+        <div class="provider-meta">
+          <div class="provider-name">${escapeHtml(r.name)}</div>
+          <div class="provider-model">${escapeHtml(r.model || '')}</div>
+        </div>
         <div class="provider-status ${statusClass}">${statusLabel}</div>
       </div>
-      <div>
-        <div class="candidate-name">
-          ${r.ok ? `<span class="candidate-dot" style="${dotStyle}"></span>` : ''}${escapeHtml(nameToShow)}
+      <div class="candidate-block">
+        ${avatarHtml}
+        <div class="candidate-text">
+          <div class="candidate-name">${escapeHtml(nameToShow)}</div>
+          ${showParty ? `<div class="candidate-party">${cand.party}</div>` : ''}
+          ${isUnknown && r.ok ? `<div class="candidate-party">${t('unrecognized_note')}</div>` : ''}
         </div>
-        ${showParty ? `<div class="candidate-party">${cand.party}</div>` : ''}
-        ${isUnknown && r.ok ? `<div class="candidate-party">${t('unrecognized_note')}</div>` : ''}
       </div>
       ${r.ok && !isNoOpinion
         ? `<div class="confidence ${r.confidence || ''}">${t('confidence')}: ${confLabel} <span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></div>`
@@ -277,7 +332,10 @@ function renderLatest(snapshot) {
       </div>
     `;
     grid.appendChild(card);
-  }
+    if (r.ok && !isNoOpinion && cand.wiki) {
+      attachCandidateImage(document.getElementById(avatarId), cand);
+    }
+  });
 }
 
 // ── Timeline ─────────────────────────────────────────────────────────
@@ -292,10 +350,12 @@ function renderTimeline() {
 
   const providerIds = [];
   const providerNames = {};
+  const providerModels = {};
   for (const snap of allSnapshots) {
     for (const r of (snap.results || [])) {
       if (!providerIds.includes(r.provider)) providerIds.push(r.provider);
       providerNames[r.provider] = r.name;
+      providerModels[r.provider] = r.model;
     }
   }
 
@@ -309,7 +369,8 @@ function renderTimeline() {
 
     const label = document.createElement('div');
     label.className = 'tl-label';
-    label.textContent = providerNames[pid] || pid;
+    label.innerHTML = `<div class="tl-label-name">${escapeHtml(providerNames[pid] || pid)}</div>
+      <div class="tl-label-model">${escapeHtml(providerModels[pid] || '')}</div>`;
     row.appendChild(label);
 
     const track = document.createElement('div');
@@ -358,25 +419,26 @@ function showDetail(snap, result) {
   const confLabel = result.confidence ? t('conf_' + result.confidence) : '—';
   const fmt = new Intl.DateTimeFormat(currentLang, { dateStyle: 'full', timeStyle: 'short' });
   const isNoOpinion = result.candidate_id === 'no_opinion';
-  const dotStyle = isNoOpinion
-    ? `background: transparent; border: 2px solid ${cand.color}`
-    : `background: ${cand.color}`;
+  const avatarBg = isNoOpinion ? 'transparent' : cand.color;
   const displayName = isNoOpinion ? t('no_opinion_label') : (result.candidate || '—');
 
   const box = document.getElementById('timelineDetail');
   box.hidden = false;
   box.innerHTML = `
     <div class="td-head">
-      <span>${escapeHtml(result.name)} · ${escapeHtml(result.model || '')}</span>
+      <span>${escapeHtml(result.name)} · <span class="td-model">${escapeHtml(result.model || '')}</span></span>
       <span>${fmt.format(new Date(snap.timestamp))}</span>
     </div>
     <div class="td-candidate">
-      <span class="candidate-dot" style="${dotStyle}"></span>${escapeHtml(displayName)}
+      <span class="candidate-avatar candidate-avatar-md" id="tdAvatar" style="background: ${avatarBg}; border-color: ${cand.color}"></span>${escapeHtml(displayName)}
     </div>
     ${isRealCandidate(result.candidate_id) ? `<div class="candidate-party">${t('party')}: ${cand.party}</div>` : ''}
     ${!isNoOpinion ? `<div class="confidence ${result.confidence || ''}" style="margin-top:0.5rem">${t('confidence')}: ${confLabel}</div>` : ''}
     <div class="reasoning">${escapeHtml(result.reasoning || '')}</div>
   `;
+  if (!isNoOpinion && cand.wiki) {
+    attachCandidateImage(document.getElementById('tdAvatar'), cand);
+  }
 }
 
 // ── Tally ────────────────────────────────────────────────────────────
@@ -408,7 +470,7 @@ function renderTally() {
   }
 
   const realMax = Math.max(...rows.filter(([id]) => isRealCandidate(id)).map(([, c]) => c), 1);
-  for (const [id, count] of rows) {
+  rows.forEach(([id, count], idx) => {
     const cand = candidateInfo(id);
     const pct = (count / realMax) * 100;
     const pctTotal = ((count / total) * 100).toFixed(1);
@@ -417,12 +479,11 @@ function renderTally() {
     const name = id === 'no_opinion' ? t('no_opinion_label')
               : id === 'unknown' ? t('unrecognized_label')
               : cand.name;
-    const dotStyle = id === 'no_opinion'
-      ? `background: transparent; border: 2px solid ${cand.color}`
-      : `background: ${cand.color}`;
+    const avatarBg = id === 'no_opinion' ? 'transparent' : cand.color;
+    const avatarId = `tallyAvatar-${idx}`;
     row.innerHTML = `
       <div class="tally-name">
-        <span class="candidate-dot" style="${dotStyle}"></span>${escapeHtml(name)}
+        <span class="candidate-avatar candidate-avatar-xs" id="${avatarId}" style="background: ${avatarBg}; border-color: ${cand.color}"></span>${escapeHtml(name)}
       </div>
       <div class="tally-bar">
         <div class="tally-bar-fill" style="width:${pct}%; background:${cand.color}"></div>
@@ -430,7 +491,10 @@ function renderTally() {
       <div class="tally-count">${count} <span style="color:var(--fg-dimmer); font-size:0.78em">(${pctTotal}%)</span></div>
     `;
     el.appendChild(row);
-  }
+    if (isRealCandidate(id) && cand.wiki) {
+      attachCandidateImage(document.getElementById(avatarId), cand);
+    }
+  });
 }
 
 // ── Utils ────────────────────────────────────────────────────────────

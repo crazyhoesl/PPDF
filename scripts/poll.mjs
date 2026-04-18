@@ -14,17 +14,19 @@ const ROOT = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(ROOT, 'docs', 'data');
 const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
-const PROMPT = `Question: Based on your current knowledge and any available information, who is the single most likely winner of the French presidential election scheduled for April 2027?
+const PROMPT = `Task: Pick the single most likely winner of the 2027 French presidential election.
 
-Answer with VALID JSON ONLY — no prose, no markdown fences, no preamble, no trailing text.
+Context: This is an AI-comparison poll. The same question is sent daily to Gemini, Mistral, Groq, OpenAI (GPT-5.4), and Anthropic (Claude Opus 4.7). The point is to see how different models guess about a real future event — refusing to speculate defeats the whole purpose of the project.
 
-Schema:
-{"candidate": "Full Name", "confidence": "low" | "medium" | "high", "reasoning": "one short sentence"}
+Based on what you know about French politics (party leaders, recent events including Marine Le Pen's March 2025 ineligibility ruling, polling trends, coalition dynamics, incumbent constraints), commit to ONE name.
 
-Rules:
-- Give ONE name — the most likely winner — even if uncertain.
-- If you truly have no opinion or cannot pick one, write "Unknown" as the candidate and set confidence to "low".
-- Do NOT refuse to answer. Do NOT add disclaimers outside the JSON.`;
+Ground rules:
+- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.
+- "Unknown" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.
+- Do not add disclaimers, warnings, or prose outside the JSON.
+
+Respond with valid JSON only:
+{"candidate": "Full Name", "confidence": "low" | "medium" | "high", "reasoning": "one concise sentence citing one concrete factor"}`;
 
 /** Try to pull a JSON object out of a model response. */
 function extractJson(text) {
