@@ -100,15 +100,28 @@ async function callGroq(apiKey, prompt, opts = {}) {
   });
 }
 
-async function callOpenAI(apiKey, prompt, opts = {}) {
-  return callOpenAICompat({
-    ...opts,
-    url: 'https://api.openai.com/v1/chat/completions',
-    apiKey,
+async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
+  // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
+  // accept arbitrary temperature values — omit temperature to use the default.
+  const body = {
     model: 'gpt-5.4',
-    prompt,
-    jsonMode: true,
-  });
+    messages: [{ role: 'user', content: prompt }],
+    max_completion_tokens: 2000,
+    response_format: { type: 'json_object' },
+  };
+  const data = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  }, timeoutMs);
+
+  const text = data?.choices?.[0]?.message?.content;
+  const finishReason = data?.choices?.[0]?.finish_reason;
+  if (!text) throw new Error(`openai: empty response (finish_reason: ${finishReason || 'unknown'})`);
+  return text;
 }
 
 // ── Anthropic / Claude ───────────────────────────────────────────────────────
@@ -116,10 +129,11 @@ async function callOpenAI(apiKey, prompt, opts = {}) {
 // shape. No response_format — JSON is enforced via prompt discipline + our
 // prose fallback in the caller.
 async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
+  // Opus 4.7 deprecates the `temperature` parameter (part of the move to
+  // adaptive thinking). Omit it entirely.
   const body = {
     model: 'claude-opus-4-7',
-    max_tokens: 800,
-    temperature: 0,
+    max_tokens: 2000,
     messages: [{ role: 'user', content: prompt }],
   };
   const data = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
