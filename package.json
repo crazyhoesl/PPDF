@@ -1,0 +1,14 @@
+{
+  "name": "ppdf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prochain Président de la France — daily AI poll on the 2027 French presidential election",
+  "scripts": {
+    "poll": "node scripts/poll.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
