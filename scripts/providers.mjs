@@ -102,14 +102,13 @@ async function callGroq(apiKey, prompt, opts = {}) {
 }
 
 async function callOpenRouter(apiKey, prompt, opts = {}) {
-  // JSON mode support on OpenRouter varies per model — DeepSeek free tier
-  // often rejects response_format, so we rely on prompt discipline + our
-  // fallback prose scanner.
+  // JSON mode support on OpenRouter varies per model — for free-tier models
+  // we rely on prompt discipline + our fallback prose scanner.
   return callOpenAICompat({
     ...opts,
     url: 'https://openrouter.ai/api/v1/chat/completions',
     apiKey,
-    model: 'deepseek/deepseek-chat-v3.1:free',
+    model: 'meta-llama/llama-3.3-70b-instruct:free',
     prompt,
     jsonMode: false,
     extraHeaders: {
@@ -124,7 +123,7 @@ async function callCerebras(apiKey, prompt, opts = {}) {
     ...opts,
     url: 'https://api.cerebras.ai/v1/chat/completions',
     apiKey,
-    model: 'llama-3.3-70b',
+    model: 'gpt-oss-120b',
     prompt,
     jsonMode: true,
   });
@@ -195,14 +194,14 @@ export const providers = [
   {
     id: 'openrouter',
     name: 'OpenRouter',
-    model: 'deepseek-chat-v3.1:free',
+    model: 'llama-3.3-70b-instruct:free',
     envKey: 'OPENROUTER_API_KEY',
     call: callOpenRouter,
   },
   {
     id: 'cerebras',
     name: 'Cerebras',
-    model: 'llama-3.3-70b',
+    model: 'gpt-oss-120b',
     envKey: 'CEREBRAS_API_KEY',
     call: callCerebras,
   },
