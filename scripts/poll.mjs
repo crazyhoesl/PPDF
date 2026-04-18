@@ -88,11 +88,18 @@ function interpret(rawText) {
   // JSON failed. Try prose extraction.
   const prose = scanProseForCandidate(rawText);
   if (prose) {
+    // If the raw text looks like truncated JSON (starts with '{'), don't
+    // dump the broken JSON into the reasoning field — leave a note instead.
+    const rawTrim = String(rawText || '').trim();
+    const looksTruncatedJson = rawTrim.startsWith('{') && !rawTrim.endsWith('}');
+    const reasoning = looksTruncatedJson
+      ? '(response was truncated — name extracted from raw text)'
+      : rawTrim.slice(0, 400);
     return {
       candidate: prose.name,
       candidate_id: prose.id,
       confidence: prose.id === 'no_opinion' ? 'low' : null,
-      reasoning: String(rawText || '').slice(0, 400).trim(),
+      reasoning,
       source: 'prose',
       match_confidence: prose.confidence,
     };
