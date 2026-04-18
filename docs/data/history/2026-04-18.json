@@ -735,5 +735,92 @@
         "error": "HTTP 400: {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"`temperature` is deprecated for this model.\"},\"request_id\":\"req_011CaBRqfSUt4Sird4dcp494\"}"
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-18T14:57:14.800Z",
+    "date": "2026-04-18",
+    "prompt": "Question: Based on your current knowledge and any available information, who is the single most likely winner of the French presidential election scheduled for April 2027?\n\nAnswer with VALID JSON ONLY — no prose, no markdown fences, no preamble, no trailing text.\n\nSchema:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one short sentence\"}\n\nRules:\n- Give ONE name — the most likely winner — even if uncertain.\n- If you truly have no opinion or cannot pick one, write \"Unknown\" as the candidate and set confidence to \"low\".\n- Do NOT refuse to answer. Do NOT add disclaimers outside the JSON.",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-2.5-flash",
+        "timestamp": "2026-04-18T14:57:11.384Z",
+        "durationMs": 1159,
+        "ok": true,
+        "raw": "{\"candidate\": \"Marine Le Pen\", \"confidence\": \"medium\", \"reasoning\": \"Current polling and political trends suggest Marine Le Pen is a strong contender, benefiting from a consolidated right-wing vote and potential dissatisfaction with the incumbent government.\"}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "medium",
+        "reasoning": "Current polling and political trends suggest Marine Le Pen is a strong contender, benefiting from a consolidated right-wing vote and potential dissatisfaction with the incumbent government.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-04-18T14:57:11.408Z",
+        "durationMs": 1249,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Unknown\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"Insufficient current data or polling to predict the 2027 French presidential election with confidence.\"\n}",
+        "candidate": "No opinion",
+        "candidate_id": "no_opinion",
+        "confidence": "low",
+        "reasoning": "Insufficient current data or polling to predict the 2027 French presidential election with confidence.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "groq",
+        "name": "Groq",
+        "model": "llama-3.3-70b-versatile",
+        "timestamp": "2026-04-18T14:57:11.409Z",
+        "durationMs": 395,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Unknown\",\n   \"confidence\": \"low\",\n   \"reasoning\": \"Insufficient current information to make a prediction\"\n}",
+        "candidate": "No opinion",
+        "candidate_id": "no_opinion",
+        "confidence": "low",
+        "reasoning": "Insufficient current information to make a prediction",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.4",
+        "timestamp": "2026-04-18T14:57:11.410Z",
+        "durationMs": 2505,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"Current polling and RN momentum make him a plausible frontrunner, but the 2027 field and alliances remain highly uncertain.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "Current polling and RN momentum make him a plausible frontrunner, but the 2027 field and alliances remain highly uncertain.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-opus-4-7",
+        "timestamp": "2026-04-18T14:57:11.411Z",
+        "durationMs": 3389,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"As RN president with Le Pen's ineligibility ruling, he is positioned as the frontrunner in early polling, though the race remains highly uncertain.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "As RN president with Le Pen's ineligibility ruling, he is positioned as the frontrunner in early polling, though the race remains highly uncertain.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
   }
 ]
