@@ -52,7 +52,7 @@ function applyLang() {
   });
   document.title = 'PPDF — ' + t('brand_sub');
   renderLangSwitch();
-  if (latestData) renderLatest(latestData);
+  if (latestData) { renderConsensus(latestData); renderLatest(latestData); }
   if (allSnapshots.length) { renderTimeline(); renderTally(); }
 }
 
@@ -121,6 +121,81 @@ async function loadData() {
     allSnapshots.push(latestData);
   }
   allSnapshots.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+}
+
+// ── Consensus (the "headline answer") ────────────────────────────────
+function computeConsensus(snapshot) {
+  if (!snapshot?.results?.length) return null;
+  const okResults = snapshot.results.filter(r => r.ok);
+  if (!okResults.length) return null;
+
+  const counts = {};
+  for (const r of okResults) {
+    const id = r.candidate_id || 'unknown';
+    counts[id] = (counts[id] || 0) + 1;
+  }
+
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const [, topCount] = sorted[0];
+  const tiedIds = sorted.filter(([, c]) => c === topCount).map(([id]) => id);
+
+  return {
+    count: topCount,
+    total: okResults.length,
+    ids: tiedIds,
+  };
+}
+
+function renderConsensus(snapshot) {
+  const el = document.getElementById('consensus');
+  if (!el) return;
+  const consensus = computeConsensus(snapshot);
+
+  if (!consensus) {
+    el.innerHTML = `<div class="consensus-waiting">${t('consensus_waiting')}</div>`;
+    return;
+  }
+
+  const countText = t('consensus_count')
+    .replace('{c}', String(consensus.count))
+    .replace('{t}', String(consensus.total));
+
+  // If the top vote is "no_opinion", flag that explicitly
+  if (consensus.ids.length === 1 && consensus.ids[0] === 'no_opinion') {
+    el.innerHTML = `
+      <div class="consensus-label">${t('consensus_today')}</div>
+      <div class="consensus-name consensus-no-opinion">${escapeHtml(t('consensus_no_opinion'))}</div>
+      <div class="consensus-meta">${escapeHtml(t('consensus_no_opinion_meta'))} · ${escapeHtml(countText)}</div>
+    `;
+    return;
+  }
+
+  // Single winner
+  if (consensus.ids.length === 1) {
+    const cand = candidateInfo(consensus.ids[0]);
+    const partyPrefix = cand.party !== '—' ? `${escapeHtml(cand.party)} · ` : '';
+    el.innerHTML = `
+      <div class="consensus-label">${t('consensus_today')}</div>
+      <div class="consensus-name" style="--cand-color: ${cand.color}">
+        <span class="candidate-dot-big" style="background: ${cand.color}"></span>${escapeHtml(cand.name)}
+      </div>
+      <div class="consensus-meta">${partyPrefix}${escapeHtml(countText)}</div>
+    `;
+    return;
+  }
+
+  // Tie — render each tied candidate
+  const items = consensus.ids.map(id => {
+    const cand = candidateInfo(id);
+    return `<div class="consensus-tied-item" style="color: ${cand.color}">
+      <span class="candidate-dot-big" style="background: ${cand.color}"></span>${escapeHtml(cand.name)}
+    </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="consensus-label">${t('consensus_tied')}</div>
+    <div class="consensus-tied">${items}</div>
+    <div class="consensus-meta">${escapeHtml(countText)}</div>
+  `;
 }
 
 // ── Latest grid ──────────────────────────────────────────────────────
@@ -364,9 +439,14 @@ function escapeHtml(s) {
 
   await loadData();
 
-  if (latestData && latestData.results?.length) renderLatest(latestData);
-  else document.getElementById('latestGrid').innerHTML =
-    `<div class="provider-card"><p class="meta">${t('latest_none')}</p></div>`;
+  if (latestData && latestData.results?.length) {
+    renderConsensus(latestData);
+    renderLatest(latestData);
+  } else {
+    renderConsensus(null);
+    document.getElementById('latestGrid').innerHTML =
+      `<div class="provider-card"><p class="meta">${t('latest_none')}</p></div>`;
+  }
   renderTimeline();
   renderTally();
 })();

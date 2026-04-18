@@ -130,6 +130,46 @@ async function callCerebras(apiKey, prompt, opts = {}) {
   });
 }
 
+async function callOpenAI(apiKey, prompt, opts = {}) {
+  return callOpenAICompat({
+    ...opts,
+    url: 'https://api.openai.com/v1/chat/completions',
+    apiKey,
+    model: 'gpt-4o-mini',
+    prompt,
+    jsonMode: true,
+  });
+}
+
+// ── Anthropic / Claude ───────────────────────────────────────────────────────
+// Not OpenAI-compatible: uses x-api-key, /v1/messages, and a different response
+// shape. No response_format — JSON is enforced via prompt discipline + our
+// prose fallback in the caller.
+async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
+  const body = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 800,
+    temperature: 0,
+    messages: [{ role: 'user', content: prompt }],
+  };
+  const data = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify(body),
+  }, timeoutMs);
+
+  // content is an array of blocks; grab text blocks
+  const blocks = Array.isArray(data?.content) ? data.content : [];
+  const text = blocks.filter(b => b?.type === 'text').map(b => b.text).join('\n').trim();
+  const stop = data?.stop_reason;
+  if (!text) throw new Error(`claude: empty response (stop_reason: ${stop || 'unknown'})`);
+  return text;
+}
+
 export const providers = [
   {
     id: 'gemini',
@@ -165,5 +205,19 @@ export const providers = [
     model: 'llama-3.3-70b',
     envKey: 'CEREBRAS_API_KEY',
     call: callCerebras,
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    model: 'gpt-4o-mini',
+    envKey: 'OPENAI_API_KEY',
+    call: callOpenAI,
+  },
+  {
+    id: 'claude',
+    name: 'Anthropic Claude',
+    model: 'claude-haiku-4-5',
+    envKey: 'CLAUDE_API_KEY',
+    call: callClaude,
   },
 ];

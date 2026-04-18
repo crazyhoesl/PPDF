@@ -50,6 +50,8 @@ Tous ont un **free tier** généreux, sans carte de crédit :
 | Groq        | `llama-3.3-70b-versatile`   | `GROQ_API_KEY`       | [console.groq.com](https://console.groq.com/keys) |
 | OpenRouter  | `deepseek-chat-v3.1:free`   | `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai/keys) |
 | Cerebras    | `llama-3.3-70b`             | `CEREBRAS_API_KEY`   | [cloud.cerebras.ai](https://cloud.cerebras.ai/) |
+| OpenAI      | `gpt-4o-mini`               | `OPENAI_API_KEY`     | [platform.openai.com](https://platform.openai.com/api-keys) |
+| Anthropic   | `claude-haiku-4-5`          | `CLAUDE_API_KEY`     | [console.anthropic.com](https://console.anthropic.com/) |
 
 Si un secret manque, le provider est simplement sauté (aucun crash). Ajouter les secrets sous `Settings → Secrets and variables → Actions`.
 
