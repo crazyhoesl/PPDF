@@ -135,14 +135,23 @@ function computeConsensus(snapshot) {
     counts[id] = (counts[id] || 0) + 1;
   }
 
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const [, topCount] = sorted[0];
-  const tiedIds = sorted.filter(([, c]) => c === topCount).map(([id]) => id);
+  // Prefer real candidate answers. "No opinion" should only win the consensus
+  // if every successful model explicitly declined — otherwise the consensus
+  // should reflect whoever the answering models picked.
+  const realEntries = Object.entries(counts).filter(([id]) => id !== 'no_opinion');
 
+  if (realEntries.length > 0) {
+    realEntries.sort((a, b) => b[1] - a[1]);
+    const [, topCount] = realEntries[0];
+    const tiedIds = realEntries.filter(([, c]) => c === topCount).map(([id]) => id);
+    return { count: topCount, total: okResults.length, ids: tiedIds };
+  }
+
+  // Fallback: every model said "I don't know"
   return {
-    count: topCount,
+    count: counts['no_opinion'] || 0,
     total: okResults.length,
-    ids: tiedIds,
+    ids: ['no_opinion'],
   };
 }
 
