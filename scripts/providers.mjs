@@ -108,7 +108,7 @@ async function callOpenRouter(apiKey, prompt, opts = {}) {
     ...opts,
     url: 'https://openrouter.ai/api/v1/chat/completions',
     apiKey,
-    model: 'meta-llama/llama-3.3-70b-instruct:free',
+    model: 'qwen/qwen3-next-80b-a3b-instruct:free',
     prompt,
     jsonMode: false,
     extraHeaders: {
@@ -123,7 +123,7 @@ async function callCerebras(apiKey, prompt, opts = {}) {
     ...opts,
     url: 'https://api.cerebras.ai/v1/chat/completions',
     apiKey,
-    model: 'gpt-oss-120b',
+    model: 'llama-4-scout-17b-16e-instruct',
     prompt,
     jsonMode: true,
   });
@@ -194,14 +194,14 @@ export const providers = [
   {
     id: 'openrouter',
     name: 'OpenRouter',
-    model: 'llama-3.3-70b-instruct:free',
+    model: 'qwen3-next-80b:free',
     envKey: 'OPENROUTER_API_KEY',
     call: callOpenRouter,
   },
   {
     id: 'cerebras',
     name: 'Cerebras',
-    model: 'gpt-oss-120b',
+    model: 'llama-4-scout-17b-16e-instruct',
     envKey: 'CEREBRAS_API_KEY',
     call: callCerebras,
   },
