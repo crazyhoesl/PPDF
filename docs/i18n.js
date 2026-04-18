@@ -33,6 +33,9 @@ window.PPDF_I18N = {
     consensus_waiting: 'En attente du prochain sondage…',
     consensus_no_opinion: 'Les modèles ne se prononcent pas',
     consensus_no_opinion_meta: 'La majorité des IA refuse de se prononcer aujourd\'hui.',
+    consensus_chart_title: 'Part des IA par candidat',
+    consensus_chart_meta: 'La part des IA qui prédisent chaque candidat, jour après jour.',
+    chart_today: 'aujourd\'hui',
   },
   en: {
     brand_sub: 'Next President of France',
@@ -66,6 +69,9 @@ window.PPDF_I18N = {
     consensus_waiting: 'Waiting for the next poll…',
     consensus_no_opinion: 'The models decline to answer',
     consensus_no_opinion_meta: 'Most AIs refused to pick a name today.',
+    consensus_chart_title: 'AI share per candidate',
+    consensus_chart_meta: 'Share of AIs predicting each candidate, day by day.',
+    chart_today: 'today',
   },
   de: {
     brand_sub: 'Nächster Präsident Frankreichs',
@@ -99,6 +105,9 @@ window.PPDF_I18N = {
     consensus_waiting: 'Warte auf den nächsten Durchlauf…',
     consensus_no_opinion: 'Die Modelle legen sich nicht fest',
     consensus_no_opinion_meta: 'Die Mehrheit der KIs wollte heute keinen Namen nennen.',
+    consensus_chart_title: 'KI-Anteil pro Kandidat',
+    consensus_chart_meta: 'Wie viele KIs jeden Kandidaten tippen, Tag für Tag.',
+    chart_today: 'heute',
   },
   it: {
     brand_sub: 'Prossimo Presidente della Francia',
@@ -132,6 +141,9 @@ window.PPDF_I18N = {
     consensus_waiting: 'In attesa del prossimo sondaggio…',
     consensus_no_opinion: 'I modelli non si pronunciano',
     consensus_no_opinion_meta: 'La maggior parte delle IA oggi rifiuta di scegliere un nome.',
+    consensus_chart_title: 'Quota IA per candidato',
+    consensus_chart_meta: 'Quota delle IA che prevedono ciascun candidato, giorno per giorno.',
+    chart_today: 'oggi',
   },
   es: {
     brand_sub: 'Próximo Presidente de Francia',
@@ -165,6 +177,9 @@ window.PPDF_I18N = {
     consensus_waiting: 'Esperando la próxima encuesta…',
     consensus_no_opinion: 'Los modelos no se pronuncian',
     consensus_no_opinion_meta: 'La mayoría de las IAs rehusó elegir un nombre hoy.',
+    consensus_chart_title: 'Cuota de IAs por candidato',
+    consensus_chart_meta: 'Cuota de las IAs que predicen cada candidato, día a día.',
+    chart_today: 'hoy',
   },
 };
 

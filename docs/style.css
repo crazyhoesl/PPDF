@@ -471,6 +471,126 @@ main {
   font-weight: 300;
 }
 
+/* ─── Consensus chart (Polymarket-style multi-line) ──────────────── */
+.consensus-chart-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 1.25rem 1rem 1rem;
+}
+.consensus-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.25rem;
+  align-items: start;
+}
+.consensus-chart {
+  width: 100%;
+  min-height: 320px;
+}
+.consensus-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+.chart-empty {
+  color: var(--fg-dim);
+  font-style: italic;
+  padding: 4rem 0;
+  text-align: center;
+}
+.chart-grid {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 1;
+}
+.chart-grid-label {
+  fill: var(--fg-dimmer);
+  font-size: 10px;
+  font-weight: 500;
+}
+.chart-x-label {
+  fill: var(--fg-dimmer);
+  font-size: 11px;
+  text-anchor: middle;
+}
+.chart-x-label-last { font-weight: 600; fill: var(--fg-dim); }
+.chart-line {
+  transition: opacity 0.2s var(--ease);
+}
+.chart-dot {
+  transition: opacity 0.2s var(--ease);
+}
+.chart-line.dimmed, .chart-dot.dimmed {
+  opacity: 0.18;
+}
+
+/* Legend */
+.consensus-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 1px solid var(--border);
+  padding-left: 1.25rem;
+}
+.legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s var(--ease);
+}
+.legend-row:hover { background: rgba(255, 255, 255, 0.04); }
+.legend-left {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0; flex: 1;
+}
+.legend-name {
+  font-size: 0.86rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.legend-right {
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.legend-share {
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--fg);
+}
+.legend-trend {
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+.legend-trend.up   { background: rgba(34, 197, 94, 0.14); color: #4ade80; }
+.legend-trend.down { background: rgba(239, 68, 68, 0.14); color: #f87171; }
+.legend-trend.flat { background: rgba(255, 255, 255, 0.05); color: var(--fg-dimmer); }
+
+@media (max-width: 800px) {
+  .consensus-chart-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .consensus-legend {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+}
+
 /* ─── Timeline ──────────────────────────────────────────────────── */
 .timeline-wrap {
   border: 1px solid var(--border);

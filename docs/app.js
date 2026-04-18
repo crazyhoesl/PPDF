@@ -102,7 +102,7 @@ function applyLang() {
   document.title = 'PPDF — ' + t('brand_sub');
   renderLangSwitch();
   if (latestData) { renderConsensus(latestData); renderLatest(latestData); }
-  if (allSnapshots.length) { renderTimeline(); renderTally(); }
+  if (allSnapshots.length) { renderConsensusChart(); renderTimeline(); renderTally(); }
 }
 
 function renderLangSwitch() {
@@ -338,6 +338,213 @@ function renderLatest(snapshot) {
   });
 }
 
+// ── Consensus Chart (per-candidate share over time) ────────────────
+// Builds a Polymarket-style multi-line chart from allSnapshots.
+// For each day, computes the share of AIs predicting each candidate.
+function renderConsensusChart() {
+  const chartEl = document.getElementById('consensusChart');
+  const legendEl = document.getElementById('consensusLegend');
+  if (!chartEl || !legendEl) return;
+
+  if (!allSnapshots.length) {
+    chartEl.innerHTML = `<div class="chart-empty">${t('latest_none')}</div>`;
+    legendEl.innerHTML = '';
+    return;
+  }
+
+  // 1) Group snapshots by day, keeping only the latest run per day
+  const byDay = {};
+  for (const snap of allSnapshots) {
+    const day = (snap.date || snap.timestamp?.slice(0, 10));
+    if (!day) continue;
+    if (!byDay[day] || snap.timestamp > byDay[day].timestamp) byDay[day] = snap;
+  }
+  const days = Object.keys(byDay).sort();
+  if (!days.length) return;
+
+  // 2) For each day, count candidate shares
+  // series[candId] = [{date, share, count, total}]
+  const series = {};
+  const seenCandidates = new Set();
+  for (const day of days) {
+    const snap = byDay[day];
+    const okResults = (snap.results || []).filter(r => r.ok);
+    const total = okResults.length;
+    const counts = {};
+    for (const r of okResults) {
+      const id = r.candidate_id || 'unknown';
+      counts[id] = (counts[id] || 0) + 1;
+    }
+    // Build a point for every candidate that EVER appeared, not just today's —
+    // so a candidate's line drops to 0 on days it didn't get any votes.
+    for (const id of Object.keys(counts)) seenCandidates.add(id);
+  }
+
+  // Now fill out each candidate's full timeline
+  for (const id of seenCandidates) {
+    series[id] = days.map(day => {
+      const snap = byDay[day];
+      const ok = (snap.results || []).filter(r => r.ok);
+      const total = ok.length;
+      const count = ok.filter(r => (r.candidate_id || 'unknown') === id).length;
+      return {
+        date: day,
+        t: new Date(day + 'T12:00:00Z').getTime(),
+        share: total > 0 ? count / total : 0,
+        count,
+        total,
+      };
+    });
+  }
+
+  // 3) Rank candidates by most-recent share, then by total votes
+  const lastDay = days[days.length - 1];
+  const ranked = Array.from(seenCandidates)
+    .map(id => {
+      const lastPoint = series[id][series[id].length - 1];
+      const total = series[id].reduce((sum, p) => sum + p.count, 0);
+      return { id, lastShare: lastPoint?.share || 0, total };
+    })
+    // no_opinion & unknown always at the bottom
+    .sort((a, b) => {
+      const aLow = (a.id === 'no_opinion' || a.id === 'unknown') ? 1 : 0;
+      const bLow = (b.id === 'no_opinion' || b.id === 'unknown') ? 1 : 0;
+      if (aLow !== bLow) return aLow - bLow;
+      if (b.lastShare !== a.lastShare) return b.lastShare - a.lastShare;
+      return b.total - a.total;
+    });
+
+  // 4) Render SVG
+  // For a single data point, we pad the x-axis so the single dot sits nicely.
+  const W = 800, H = 320, PAD_L = 40, PAD_R = 20, PAD_T = 20, PAD_B = 40;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+
+  const firstT = new Date(days[0] + 'T12:00:00Z').getTime();
+  const lastT = new Date(days[days.length - 1] + 'T12:00:00Z').getTime();
+  const spanT = Math.max(1, lastT - firstT);
+  // Single-point case: put the dot at 80% across so legend aligns cleanly
+  const xScale = (t) => {
+    if (days.length === 1) return PAD_L + innerW * 0.8;
+    return PAD_L + ((t - firstT) / spanT) * innerW;
+  };
+  const yScale = (share) => PAD_T + innerH - share * innerH;
+
+  // Build SVG parts
+  const gridYValues = [0, 0.25, 0.5, 0.75, 1];
+  const gridLines = gridYValues.map(v => {
+    const y = yScale(v);
+    return `
+      <line x1="${PAD_L}" x2="${W - PAD_R}" y1="${y}" y2="${y}" class="chart-grid"/>
+      <text x="${W - PAD_R + 4}" y="${y + 4}" class="chart-grid-label">${Math.round(v * 100)}%</text>`;
+  }).join('');
+
+  // X-axis ticks (up to 5)
+  const tickCount = Math.min(5, days.length);
+  const tickStep = Math.max(1, Math.floor(days.length / tickCount));
+  const xTicks = [];
+  for (let i = 0; i < days.length; i += tickStep) {
+    const d = new Date(days[i] + 'T12:00:00Z');
+    const label = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short' }).format(d);
+    const x = xScale(d.getTime());
+    xTicks.push(`<text x="${x}" y="${H - 10}" class="chart-x-label">${escapeHtml(label)}</text>`);
+  }
+  // Always include last day
+  if (days.length > 1) {
+    const d = new Date(days[days.length - 1] + 'T12:00:00Z');
+    const label = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short' }).format(d);
+    const x = xScale(d.getTime());
+    xTicks.push(`<text x="${x}" y="${H - 10}" class="chart-x-label chart-x-label-last">${escapeHtml(label)}</text>`);
+  }
+
+  // Build lines + area fills for each candidate
+  const linePaths = [];
+  const dotMarkers = [];
+  for (const { id } of ranked) {
+    const cand = candidateInfo(id);
+    const points = series[id];
+    if (!points.length) continue;
+
+    if (points.length === 1) {
+      // Single data point → just a dot
+      const p = points[0];
+      const x = xScale(p.t), y = yScale(p.share);
+      dotMarkers.push(`<circle cx="${x}" cy="${y}" r="5" fill="${cand.color}" stroke="var(--bg)" stroke-width="2" class="chart-dot" data-cand="${id}"/>`);
+    } else {
+      const pathD = points.map((p, i) => {
+        const x = xScale(p.t), y = yScale(p.share);
+        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+      linePaths.push(`<path d="${pathD}" fill="none" stroke="${cand.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="chart-line" data-cand="${id}"/>`);
+      // Final-point dot
+      const lastP = points[points.length - 1];
+      const x = xScale(lastP.t), y = yScale(lastP.share);
+      dotMarkers.push(`<circle cx="${x}" cy="${y}" r="4" fill="${cand.color}" stroke="var(--bg)" stroke-width="2" class="chart-dot" data-cand="${id}"/>`);
+    }
+  }
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Consensus chart">
+    ${gridLines}
+    ${xTicks.join('')}
+    ${linePaths.join('')}
+    ${dotMarkers.join('')}
+  </svg>`;
+
+  chartEl.innerHTML = svg;
+
+  // 5) Legend — name, share%, trend arrow
+  const legendRows = ranked.map(({ id }) => {
+    const cand = candidateInfo(id);
+    const points = series[id];
+    const last = points[points.length - 1];
+    const prev = points.length > 1 ? points[points.length - 2] : null;
+    const shareNow = last ? last.share : 0;
+    const sharePrev = prev ? prev.share : shareNow;
+    const delta = shareNow - sharePrev;
+    const arrow = delta > 0.001 ? '↗' : delta < -0.001 ? '↘' : '→';
+    const arrowClass = delta > 0.001 ? 'up' : delta < -0.001 ? 'down' : 'flat';
+    const displayName = id === 'no_opinion' ? t('no_opinion_label')
+                     : id === 'unknown' ? t('unrecognized_label')
+                     : cand.name;
+    const avatarId = `legendAvatar-${id}`;
+    const avatarBg = id === 'no_opinion' ? 'transparent' : cand.color;
+    return `
+      <div class="legend-row" data-cand="${id}">
+        <div class="legend-left">
+          <span class="candidate-avatar candidate-avatar-xs" id="${avatarId}" style="background: ${avatarBg}; border-color: ${cand.color}"></span>
+          <span class="legend-name">${escapeHtml(displayName)}</span>
+        </div>
+        <div class="legend-right">
+          <span class="legend-share">${Math.round(shareNow * 100)}%</span>
+          <span class="legend-trend ${arrowClass}">${arrow} ${Math.abs(Math.round(delta * 100))}%</span>
+        </div>
+      </div>`;
+  }).join('');
+  legendEl.innerHTML = legendRows;
+
+  // Fetch avatars
+  ranked.forEach(({ id }) => {
+    if (isRealCandidate(id)) {
+      attachCandidateImage(document.getElementById(`legendAvatar-${id}`), candidateInfo(id));
+    }
+  });
+
+  // Hover interactions: dim other lines when hovering a legend row
+  document.querySelectorAll('.legend-row').forEach(row => {
+    row.addEventListener('mouseenter', () => {
+      const cand = row.dataset.cand;
+      chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
+        el.classList.toggle('dimmed', el.dataset.cand !== cand);
+      });
+    });
+    row.addEventListener('mouseleave', () => {
+      chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
+        el.classList.remove('dimmed');
+      });
+    });
+  });
+}
+
 // ── Timeline ─────────────────────────────────────────────────────────
 function renderTimeline() {
   const tl = document.getElementById('timeline');
@@ -520,6 +727,7 @@ function escapeHtml(s) {
     document.getElementById('latestGrid').innerHTML =
       `<div class="provider-card"><p class="meta">${t('latest_none')}</p></div>`;
   }
+  renderConsensusChart();
   renderTimeline();
   renderTally();
 })();
