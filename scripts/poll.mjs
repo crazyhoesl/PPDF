@@ -148,7 +148,7 @@ async function runProvider(provider) {
       return result;
     }
 
-    // 30-second hard timeout per provider, with one retry on network/5xx
+    // 30-second hard timeout per provider, with one retry on network/5xx/429
     let text = null;
     let lastErr = null;
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -159,9 +159,11 @@ async function runProvider(provider) {
       } catch (err) {
         lastErr = err;
         const msg = String(err?.message ?? '');
-        const retriable = /HTTP 5\d\d|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
+        const retriable = /HTTP 5\d\d|HTTP 429|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
         if (attempt === 1 && retriable) {
-          await new Promise(r => setTimeout(r, 1500));
+          // Small backoff — 2s for 429 (more aggressive spacing), 1.5s otherwise
+          const delay = /429/.test(msg) ? 2500 : 1500;
+          await new Promise(r => setTimeout(r, delay));
           continue;
         }
         throw err;
