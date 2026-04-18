@@ -32,7 +32,11 @@ async function callGemini(apiKey, prompt, { timeoutMs } = {}) {
     generationConfig: {
       temperature: 0,
       responseMimeType: 'application/json',
-      maxOutputTokens: 800,
+      maxOutputTokens: 2000,
+      // Disable "thinking" — for this simple JSON extraction task the
+      // internal reasoning budget would otherwise eat the token allowance
+      // and truncate the visible response.
+      thinkingConfig: { thinkingBudget: 0 },
     },
   };
   const data = await fetchWithTimeout(url, {
