@@ -296,16 +296,18 @@ main {
 
 /* ─── Next poll indicator (under the countdown) ──────────────────── */
 .next-poll {
-  margin-top: 1rem;
+  margin: 1rem auto 0;
+  padding: 0 1rem;
   font-size: 0.78rem;
   color: var(--fg-dimmer);
   font-weight: 400;
   letter-spacing: 0.02em;
-  display: inline-flex;
+  display: flex;
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: fit-content;
   opacity: 0;
   animation: fadeInLate 0.6s 0.3s var(--ease) forwards;
 }
