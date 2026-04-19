@@ -90,17 +90,6 @@ async function callMistral(apiKey, prompt, opts = {}) {
   });
 }
 
-async function callGroq(apiKey, prompt, opts = {}) {
-  return callOpenAICompat({
-    ...opts,
-    url: 'https://api.groq.com/openai/v1/chat/completions',
-    apiKey,
-    model: 'llama-3.3-70b-versatile',
-    prompt,
-    jsonMode: true,
-  });
-}
-
 // ── xAI Grok ────────────────────────────────────────────────────────────────
 // Different beast from Groq (the Llama host) — this is xAI's own frontier
 // model. Reasoning variant: reasoning tokens aren't visible in the response
@@ -195,13 +184,6 @@ export const providers = [
     model: 'mistral-large-latest',
     envKey: 'MISTRAL_API_KEY',
     call: callMistral,
-  },
-  {
-    id: 'groq',
-    name: 'Groq',
-    model: 'llama-3.3-70b-versatile',
-    envKey: 'GROQ_API_KEY',
-    call: callGroq,
   },
   {
     id: 'grok',
