@@ -3,7 +3,7 @@
 window.PPDF_I18N = {
   fr: {
     brand_sub: 'Prochain Président de la France',
-    hero_question: 'Qui sera le prochain président ?',
+    hero_question: 'Qui sera le prochain président de la France ?',
     hero_lede: 'Chaque jour, plusieurs IA répondent à la même question. Voici ce qu\'elles pensent.',
     countdown_label: '2<sup>e</sup> tour — 25 avril 2027',
     unit_days: 'jours', unit_hours: 'heures', unit_minutes: 'minutes', unit_seconds: 'secondes',
@@ -44,7 +44,7 @@ window.PPDF_I18N = {
   },
   en: {
     brand_sub: 'Next President of France',
-    hero_question: 'Who will be the next president?',
+    hero_question: "Who will be France's next president?",
     hero_lede: 'Every day, several AIs answer the same question. Here is what they think.',
     countdown_label: '2<sup>nd</sup> round — 25 April 2027',
     unit_days: 'days', unit_hours: 'hours', unit_minutes: 'minutes', unit_seconds: 'seconds',
@@ -85,7 +85,7 @@ window.PPDF_I18N = {
   },
   de: {
     brand_sub: 'Nächster Präsident Frankreichs',
-    hero_question: 'Wer wird der nächste Präsident?',
+    hero_question: 'Wer wird Frankreichs nächster Präsident?',
     hero_lede: 'Jeden Tag beantworten mehrere KIs die gleiche Frage. Hier ist, was sie denken.',
     countdown_label: '2. Wahlgang — 25. April 2027',
     unit_days: 'Tage', unit_hours: 'Std.', unit_minutes: 'Min.', unit_seconds: 'Sek.',
@@ -126,7 +126,7 @@ window.PPDF_I18N = {
   },
   it: {
     brand_sub: 'Prossimo Presidente della Francia',
-    hero_question: 'Chi sarà il prossimo presidente?',
+    hero_question: 'Chi sarà il prossimo presidente della Francia?',
     hero_lede: 'Ogni giorno, diverse IA rispondono alla stessa domanda. Ecco cosa pensano.',
     countdown_label: '2° turno — 25 aprile 2027',
     unit_days: 'giorni', unit_hours: 'ore', unit_minutes: 'minuti', unit_seconds: 'secondi',
@@ -167,7 +167,7 @@ window.PPDF_I18N = {
   },
   es: {
     brand_sub: 'Próximo Presidente de Francia',
-    hero_question: '¿Quién será el próximo presidente?',
+    hero_question: '¿Quién será el próximo presidente de Francia?',
     hero_lede: 'Cada día, varias IAs responden a la misma pregunta. Esto es lo que piensan.',
     countdown_label: '2ª vuelta — 25 de abril de 2027',
     unit_days: 'días', unit_hours: 'horas', unit_minutes: 'minutos', unit_seconds: 'segundos',
