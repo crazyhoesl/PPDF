@@ -25,16 +25,19 @@ async function fetchWithTimeout(url, opts, timeoutMs = 30_000) {
 
 // ── Gemini ───────────────────────────────────────────────────────────────────
 async function callGemini(apiKey, prompt, { timeoutMs } = {}) {
-  const model = 'gemini-3.1-pro';
+  // "-preview" suffix required — `gemini-3.1-pro` alone returns 404.
+  const model = 'gemini-3.1-pro-preview';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const body = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0,
       responseMimeType: 'application/json',
-      // Gemini 3.1 Pro is a reasoning model — give it enough headroom for
-      // internal thinking plus the final JSON (~300 tokens).
       maxOutputTokens: 8000,
+      // Gemini 3.x switched from thinkingBudget → thinkingLevel.
+      // Supported values for 3.1 Pro: 'low' | 'medium' | 'high' (default: high).
+      // 'low' is plenty for picking one name + a sentence of reasoning.
+      thinkingConfig: { thinkingLevel: 'low' },
     },
   };
   const data = await fetchWithTimeout(url, {
@@ -182,7 +185,7 @@ export const providers = [
   {
     id: 'gemini',
     name: 'Google Gemini',
-    model: 'gemini-3.1-pro',
+    model: 'gemini-3.1-pro-preview',
     envKey: 'GEMINI_API_KEY',
     call: callGemini,
   },
