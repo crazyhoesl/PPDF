@@ -110,6 +110,8 @@ function applyLang() {
   });
   document.title = 'PPDF — ' + t('brand_sub');
   renderLangSwitch();
+  lastNextPollMinute = -1; // force re-render on next tick with new locale
+  renderNextPoll();
   if (latestData) { renderConsensus(latestData); renderLatest(latestData); }
   if (allSnapshots.length) { renderConsensusChart(); renderTimeline(); renderTally(); }
 }
@@ -151,6 +153,63 @@ function tickCountdown() {
   el.h.textContent = String(hours).padStart(2, '0');
   el.m.textContent = String(mins).padStart(2, '0');
   el.s.textContent = String(secs).padStart(2, '0');
+
+  // Refresh the "next poll" line only when the minute rolls over — no need
+  // to re-render a text that changes once per 60s at 1Hz.
+  const nowMin = Math.floor(Date.now() / 60000);
+  if (nowMin !== lastNextPollMinute) {
+    lastNextPollMinute = nowMin;
+    renderNextPoll();
+  }
+}
+
+// ── Next poll indicator ──────────────────────────────────────────────
+// Daily cron is `0 7 * * *` — 07:00 UTC. We compute the next occurrence,
+// render it in the user's locale, and show a relative "in Xh Ymin" too.
+let lastNextPollMinute = -1;
+
+function computeNextRun() {
+  const now = new Date();
+  const next = new Date(Date.UTC(
+    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 7, 0, 0, 0
+  ));
+  if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
+
+function formatRelative(ms) {
+  const mins = Math.max(0, Math.floor(ms / 60000));
+  if (mins < 1)  return t('np_soon');
+  if (mins < 60) return `${mins} min`;
+  const hours = Math.floor(mins / 60);
+  const rem = mins % 60;
+  return rem > 0 ? `${hours}h ${rem}min` : `${hours}h`;
+}
+
+function renderNextPoll() {
+  const el = document.getElementById('nextPoll');
+  if (!el) return;
+  const nextRun = computeNextRun();
+  const now = new Date();
+  const diffMs = nextRun.getTime() - now.getTime();
+
+  // "today" vs "tomorrow" based on the *user's* local calendar
+  const sameDay = nextRun.getFullYear() === now.getFullYear()
+               && nextRun.getMonth() === now.getMonth()
+               && nextRun.getDate() === now.getDate();
+  const whenLabel = sameDay ? t('np_today') : t('np_tomorrow');
+
+  const timeFmt = new Intl.DateTimeFormat(currentLang, { hour: '2-digit', minute: '2-digit' });
+  const timeStr = timeFmt.format(nextRun);
+  const relStr = formatRelative(diffMs);
+
+  el.innerHTML = `
+    <span class="np-label">${escapeHtml(t('np_label'))}</span>
+    <span class="np-sep">·</span>
+    <span class="np-when">${escapeHtml(whenLabel)} ${escapeHtml(timeStr)}</span>
+    <span class="np-sep">·</span>
+    <span class="np-relative">${escapeHtml(t('np_in'))} ${escapeHtml(relStr)}</span>
+  `;
 }
 
 // ── Data loading ─────────────────────────────────────────────────────
