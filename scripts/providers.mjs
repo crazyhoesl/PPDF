@@ -25,18 +25,16 @@ async function fetchWithTimeout(url, opts, timeoutMs = 30_000) {
 
 // ── Gemini ───────────────────────────────────────────────────────────────────
 async function callGemini(apiKey, prompt, { timeoutMs } = {}) {
-  const model = 'gemini-2.5-flash';
+  const model = 'gemini-3.1-pro';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const body = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: {
       temperature: 0,
       responseMimeType: 'application/json',
-      maxOutputTokens: 2000,
-      // Disable "thinking" — for this simple JSON extraction task the
-      // internal reasoning budget would otherwise eat the token allowance
-      // and truncate the visible response.
-      thinkingConfig: { thinkingBudget: 0 },
+      // Gemini 3.1 Pro is a reasoning model — give it enough headroom for
+      // internal thinking plus the final JSON (~300 tokens).
+      maxOutputTokens: 8000,
     },
   };
   const data = await fetchWithTimeout(url, {
@@ -100,6 +98,32 @@ async function callGroq(apiKey, prompt, opts = {}) {
   });
 }
 
+// ── xAI Grok ────────────────────────────────────────────────────────────────
+// Different beast from Groq (the Llama host) — this is xAI's own frontier
+// model. Reasoning variant: reasoning tokens aren't visible in the response
+// but eat the max_tokens budget, so we give it more headroom.
+async function callGrok(apiKey, prompt, { timeoutMs } = {}) {
+  const body = {
+    model: 'grok-4-1-fast-reasoning',
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 8000,
+    response_format: { type: 'json_object' },
+    // Reasoning models on xAI don't accept `temperature` — omit it.
+  };
+  const data = await fetchWithTimeout('https://api.x.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  }, timeoutMs);
+  const text = data?.choices?.[0]?.message?.content;
+  const finishReason = data?.choices?.[0]?.finish_reason;
+  if (!text) throw new Error(`grok: empty response (finish_reason: ${finishReason || 'unknown'})`);
+  return text;
+}
+
 async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
   // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
   // accept arbitrary temperature values — omit temperature to use the default.
@@ -125,15 +149,16 @@ async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
 }
 
 // ── Anthropic / Claude ───────────────────────────────────────────────────────
-// Not OpenAI-compatible: uses x-api-key, /v1/messages, and a different response
-// shape. No response_format — JSON is enforced via prompt discipline + our
-// prose fallback in the caller.
+// Opus 4.7 removes temperature entirely (400 error if set) and uses a new
+// tokenizer (~1–1.35x more tokens per text). Adaptive thinking is off by
+// default — we enable it to get the model's best reasoning for this task.
+// Thinking blocks are omitted from response by default, so we just get the
+// final text content.
 async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
-  // Opus 4.7 deprecates the `temperature` parameter (part of the move to
-  // adaptive thinking). Omit it entirely.
   const body = {
     model: 'claude-opus-4-7',
-    max_tokens: 2000,
+    max_tokens: 8000,
+    thinking: { type: 'adaptive' },
     messages: [{ role: 'user', content: prompt }],
   };
   const data = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
@@ -157,7 +182,7 @@ export const providers = [
   {
     id: 'gemini',
     name: 'Google Gemini',
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3.1-pro',
     envKey: 'GEMINI_API_KEY',
     call: callGemini,
   },
@@ -174,6 +199,13 @@ export const providers = [
     model: 'llama-3.3-70b-versatile',
     envKey: 'GROQ_API_KEY',
     call: callGroq,
+  },
+  {
+    id: 'grok',
+    name: 'xAI Grok',
+    model: 'grok-4-1-fast-reasoning',
+    envKey: 'XAI_API_KEY',
+    call: callGrok,
   },
   {
     id: 'openai',

@@ -34,7 +34,7 @@ function isRealCandidate(id) { return id && id !== 'no_opinion' && id !== 'unkno
 
 // Provider IDs we want displayed. Historical snapshots may contain retired
 // providers (openrouter, cerebras); those are filtered out of every UI view.
-const ACTIVE_PROVIDERS = ['gemini', 'mistral', 'groq', 'openai', 'claude'];
+const ACTIVE_PROVIDERS = ['gemini', 'mistral', 'groq', 'grok', 'openai', 'claude'];
 function isActiveProvider(id) { return ACTIVE_PROVIDERS.includes(id); }
 /** Returns the subset of results in a snapshot that come from active providers. */
 function activeResults(snapshot) {

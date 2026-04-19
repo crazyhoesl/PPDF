@@ -30,6 +30,7 @@ jobs:
           GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
           MISTRAL_API_KEY:    ${{ secrets.MISTRAL_API_KEY }}
           GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          XAI_API_KEY:        ${{ secrets.XAI_API_KEY }}
           OPENAI_API_KEY:     ${{ secrets.OPENAI_API_KEY }}
           CLAUDE_API_KEY:     ${{ secrets.CLAUDE_API_KEY }}
         run: node scripts/poll.mjs
