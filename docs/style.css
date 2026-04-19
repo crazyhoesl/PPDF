@@ -356,8 +356,18 @@ main {
 /* ─── Latest grid ───────────────────────────────────────────────── */
 .latest-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  /* 5 cards at full width (one per provider), with responsive break points */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1rem;
+}
+@media (max-width: 1100px) {
+  .latest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 780px) {
+  .latest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .latest-grid { grid-template-columns: 1fr; }
 }
 
 .provider-card {
@@ -899,4 +909,65 @@ main {
 @media (max-width: 420px) {
   .countdown-values { flex-wrap: wrap; }
   .cd-block { min-width: 64px; }
+}
+
+/* ─── Prompt section (collapsible) ──────────────────────────────── */
+.prompt-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+.prompt-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: background 0.2s var(--ease);
+}
+.prompt-summary:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+/* Hide the default disclosure triangle (Safari/Firefox) */
+.prompt-summary::-webkit-details-marker { display: none; }
+.prompt-summary::marker { content: ''; }
+.prompt-chevron {
+  display: inline-block;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--fg-dim);
+  transition: transform 0.25s var(--ease);
+  transform: rotate(0deg);
+}
+.prompt-box[open] .prompt-chevron {
+  transform: rotate(90deg);
+}
+.prompt-text {
+  margin: 0;
+  padding: 1.2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-family: 'SF Mono', ui-monospace, 'Cascadia Mono', 'Roboto Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--fg-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(0, 0, 0, 0.15);
+  overflow-x: auto;
+}
+.prompt-footnote {
+  padding: 0.6rem 1.5rem 1rem;
+  font-size: 0.72rem;
+  color: var(--fg-dimmer);
+  font-style: italic;
+  letter-spacing: 0.02em;
 }

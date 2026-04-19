@@ -110,6 +110,9 @@ function applyLang() {
   });
   document.title = 'PPDF — ' + t('brand_sub');
   renderLangSwitch();
+  // Prompt text in the footer section — uses textContent (newlines preserved by <pre>)
+  const promptEl = document.getElementById('promptText');
+  if (promptEl) promptEl.textContent = t('prompt_text');
   lastNextPollMinute = -1; // force re-render on next tick with new locale
   renderNextPoll();
   if (latestData) { renderConsensus(latestData); renderLatest(latestData); }

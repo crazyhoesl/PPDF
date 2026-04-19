@@ -102,6 +102,21 @@
     <div id="tally" class="tally"></div>
   </section>
 
+  <section class="section">
+    <div class="section-head">
+      <h2 data-i18n="prompt_title">Le prompt envoyé aux IA</h2>
+      <p class="meta" data-i18n="prompt_meta">Chaque jour, cet exact message est envoyé aux 5 modèles. En anglais car c'est la langue de travail de la plupart des modèles.</p>
+    </div>
+    <details class="prompt-box">
+      <summary class="prompt-summary">
+        <span data-i18n="prompt_toggle">Afficher le prompt complet</span>
+        <span class="prompt-chevron" aria-hidden="true">›</span>
+      </summary>
+      <pre class="prompt-text" id="promptText" aria-label="Prompt text"></pre>
+      <div class="prompt-footnote" data-i18n="prompt_footnote">Le texte ci-dessous est toujours envoyé en anglais aux modèles. La traduction affichée ici est uniquement pour la lisibilité.</div>
+    </details>
+  </section>
+
 </main>
 
 <footer class="site-footer">
