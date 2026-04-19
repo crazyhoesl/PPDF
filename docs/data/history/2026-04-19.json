@@ -85,5 +85,108 @@
         "error": null
       }
     ]
+  },
+  {
+    "timestamp": "2026-04-19T09:12:54.567Z",
+    "date": "2026-04-19",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nContext: This is an AI-comparison poll. The same question is sent daily to Gemini 3.1 Pro, Mistral, Groq (Llama), xAI Grok, OpenAI (GPT-5.4), and Anthropic (Claude Opus 4.7). The point is to see how different models guess about a real future event — refusing to speculate defeats the whole purpose of the project.\n\nBased on what you know about French politics (party leaders, recent events including Marine Le Pen's March 2025 ineligibility ruling, polling trends, coalition dynamics, incumbent constraints), commit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro",
+        "timestamp": "2026-04-19T09:12:49.540Z",
+        "durationMs": 187,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 404: {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"models/gemini-3.1-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.\",\n    \"status\": \"NOT_FOUND\"\n  }\n}\n"
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-04-19T09:12:49.566Z",
+        "durationMs": 1613,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Jordan Bardella\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"As the new leader of the National Rally following Marine Le Pen's ineligibility, Bardella is positioned to capitalize on the party's strong polling and anti-incumbent sentiment.\"\n}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "As the new leader of the National Rally following Marine Le Pen's ineligibility, Bardella is positioned to capitalize on the party's strong polling and anti-incumbent sentiment.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "groq",
+        "name": "Groq",
+        "model": "llama-3.3-70b-versatile",
+        "timestamp": "2026-04-19T09:12:49.567Z",
+        "durationMs": 444,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Emmanuel Macron\",\n   \"confidence\": \"medium\",\n   \"reasoning\": \"Incumbent presidents often have an advantage in French elections, despite recent challenges.\"\n}",
+        "candidate": "Emmanuel Macron",
+        "candidate_id": "macron",
+        "confidence": "medium",
+        "reasoning": "Incumbent presidents often have an advantage in French elections, despite recent challenges.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-04-19T09:12:49.568Z",
+        "durationMs": 4999,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"medium\", \"reasoning\": \"National Rally's persistent polling dominance positions Bardella as the frontrunner after Le Pen's 2025 ineligibility ruling.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "National Rally's persistent polling dominance positions Bardella as the frontrunner after Le Pen's 2025 ineligibility ruling.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.4",
+        "timestamp": "2026-04-19T09:12:49.569Z",
+        "durationMs": 2471,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"medium\",\"reasoning\":\"Marine Le Pen's March 2025 ineligibility ruling most likely makes Bardella the National Rally standard-bearer, and RN remains the strongest single electoral force in current French polling.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "Marine Le Pen's March 2025 ineligibility ruling most likely makes Bardella the National Rally standard-bearer, and RN remains the strongest single electoral force in current French polling.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-opus-4-7",
+        "timestamp": "2026-04-19T09:12:49.570Z",
+        "durationMs": 2936,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen ruled ineligible in March 2025, Bardella becomes the RN's likely standard-bearer and leads most early 2027 polling amid a fragmented left and a weakened Macronist center.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen ruled ineligible in March 2025, Bardella becomes the RN's likely standard-bearer and leads most early 2027 polling amid a fragmented left and a weakened Macronist center.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
   }
 ]
