@@ -36,8 +36,9 @@ async function callGemini(apiKey, prompt, { timeoutMs } = {}) {
       maxOutputTokens: 8000,
       // Gemini 3.x switched from thinkingBudget → thinkingLevel.
       // Supported values for 3.1 Pro: 'low' | 'medium' | 'high' (default: high).
-      // 'low' is plenty for picking one name + a sentence of reasoning.
-      thinkingConfig: { thinkingLevel: 'low' },
+      // 'medium' balances cost/latency against more consistent reasoning —
+      // 'low' gave noticeable run-to-run variance on this prompt.
+      thinkingConfig: { thinkingLevel: 'medium' },
     },
   };
   const data = await fetchWithTimeout(url, {
