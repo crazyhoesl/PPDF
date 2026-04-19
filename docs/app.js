@@ -525,30 +525,36 @@ function renderConsensusChart() {
     xTicks.push(`<text x="${x}" y="${H - 10}" class="chart-x-label chart-x-label-last">${escapeHtml(label)}</text>`);
   }
 
-  // Build lines + area fills for each candidate
+  // Build lines, dots per data point, and invisible hover hit-areas
   const linePaths = [];
   const dotMarkers = [];
+  // pointRegistry: a flat list of every data point for hit-testing
+  //   [{ candId, x, y, share, t, count, total }]
+  const pointRegistry = [];
   for (const { id } of ranked) {
     const cand = candidateInfo(id);
     const points = series[id];
     if (!points.length) continue;
 
-    if (points.length === 1) {
-      // Single data point → just a dot
-      const p = points[0];
-      const x = xScale(p.t), y = yScale(p.share);
-      dotMarkers.push(`<circle cx="${x}" cy="${y}" r="5" fill="${cand.color}" stroke="var(--bg)" stroke-width="2" class="chart-dot" data-cand="${id}"/>`);
-    } else {
+    if (points.length > 1) {
       const pathD = points.map((p, i) => {
         const x = xScale(p.t), y = yScale(p.share);
         return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
       }).join(' ');
       linePaths.push(`<path d="${pathD}" fill="none" stroke="${cand.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" class="chart-line" data-cand="${id}"/>`);
-      // Final-point dot
-      const lastP = points[points.length - 1];
-      const x = xScale(lastP.t), y = yScale(lastP.share);
-      dotMarkers.push(`<circle cx="${x}" cy="${y}" r="4" fill="${cand.color}" stroke="var(--bg)" stroke-width="2" class="chart-dot" data-cand="${id}"/>`);
     }
+
+    // Always draw a dot at every data point — invisible until hovered (reduces
+    // visual noise with many candidates) but picks up hover events.
+    points.forEach((p, i) => {
+      const x = xScale(p.t), y = yScale(p.share);
+      const isLast = i === points.length - 1;
+      // Prominent dot only on last point; inner points are thin circles
+      const radius = isLast ? 5 : 3.5;
+      const cls = isLast ? 'chart-dot chart-dot-last' : 'chart-dot';
+      dotMarkers.push(`<circle cx="${x}" cy="${y}" r="${radius}" fill="${cand.color}" stroke="var(--bg)" stroke-width="2" class="${cls}" data-cand="${id}" data-date="${p.date}"/>`);
+      pointRegistry.push({ candId: id, x, y, share: p.share, t: p.t, count: p.count, total: p.total, date: p.date });
+    });
   }
 
   const svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Consensus chart">
@@ -556,6 +562,7 @@ function renderConsensusChart() {
     ${xTicks.join('')}
     ${linePaths.join('')}
     ${dotMarkers.join('')}
+    <rect x="${PAD_L}" y="${PAD_T}" width="${innerW}" height="${innerH}" fill="transparent" class="chart-hit-area"/>
   </svg>`;
 
   chartEl.innerHTML = svg;
@@ -579,6 +586,7 @@ function renderConsensusChart() {
     return `
       <div class="legend-row" data-cand="${id}">
         <div class="legend-left">
+          <span class="legend-swatch" style="background: ${cand.color}"></span>
           <span class="candidate-avatar candidate-avatar-xs" id="${avatarId}" style="background: ${avatarBg}; border-color: ${cand.color}"></span>
           <span class="legend-name">${escapeHtml(displayName)}</span>
         </div>
@@ -590,26 +598,129 @@ function renderConsensusChart() {
   }).join('');
   legendEl.innerHTML = legendRows;
 
-  // Fetch avatars
+  // Fetch avatars for legend
   ranked.forEach(({ id }) => {
     if (isRealCandidate(id)) {
       attachCandidateImage(document.getElementById(`legendAvatar-${id}`), candidateInfo(id));
     }
   });
 
-  // Hover interactions: dim other lines when hovering a legend row
-  document.querySelectorAll('.legend-row').forEach(row => {
-    row.addEventListener('mouseenter', () => {
-      const cand = row.dataset.cand;
-      chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
-        el.classList.toggle('dimmed', el.dataset.cand !== cand);
-      });
+  // ── Interactivity ──────────────────────────────────────────────────
+  const tooltipEl = document.getElementById('consensusTooltip');
+  const svgEl = chartEl.querySelector('svg');
+  const hitArea = chartEl.querySelector('.chart-hit-area');
+
+  function dimExcept(candId) {
+    chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
+      el.classList.toggle('dimmed', candId != null && el.dataset.cand !== candId);
+      el.classList.toggle('highlighted', el.dataset.cand === candId);
     });
-    row.addEventListener('mouseleave', () => {
-      chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
-        el.classList.remove('dimmed');
-      });
+    legendEl.querySelectorAll('.legend-row').forEach(row => {
+      row.classList.toggle('highlighted', candId != null && row.dataset.cand === candId);
     });
+  }
+  function clearDim() {
+    chartEl.querySelectorAll('.chart-line, .chart-dot').forEach(el => {
+      el.classList.remove('dimmed');
+      el.classList.remove('highlighted');
+    });
+    legendEl.querySelectorAll('.legend-row').forEach(row => row.classList.remove('highlighted'));
+  }
+
+  function showTooltip(point, clientX, clientY) {
+    const cand = candidateInfo(point.candId);
+    const displayName = point.candId === 'no_opinion' ? t('no_opinion_label')
+                     : point.candId === 'unknown' ? t('unrecognized_label')
+                     : cand.name;
+    const dateFmt = new Intl.DateTimeFormat(currentLang, { weekday: 'short', day: 'numeric', month: 'short' });
+    const dateStr = dateFmt.format(new Date(point.date + 'T12:00:00Z'));
+    const pct = Math.round(point.share * 100);
+    const avatarBg = point.candId === 'no_opinion' ? 'transparent' : cand.color;
+    const avatarTooltipId = `tooltipAvatar`;
+    tooltipEl.innerHTML = `
+      <div class="tooltip-row">
+        <span class="candidate-avatar candidate-avatar-xs" id="${avatarTooltipId}" style="background: ${avatarBg}; border-color: ${cand.color}"></span>
+        <span class="tooltip-name" style="color: ${cand.color}">${escapeHtml(displayName)}</span>
+      </div>
+      <div class="tooltip-row tooltip-stat">
+        <span class="tooltip-pct">${pct}%</span>
+        <span class="tooltip-count">(${point.count}/${point.total})</span>
+      </div>
+      <div class="tooltip-date">${escapeHtml(dateStr)}</div>
+    `;
+    tooltipEl.hidden = false;
+    if (isRealCandidate(point.candId)) {
+      attachCandidateImage(document.getElementById(avatarTooltipId), cand);
+    }
+    // Position tooltip relative to chart container
+    const chartRect = chartEl.getBoundingClientRect();
+    const tooltipRect = tooltipEl.getBoundingClientRect();
+    let left = clientX - chartRect.left + 14;
+    let top = clientY - chartRect.top + 14;
+    // Flip horizontally if near right edge
+    if (left + tooltipRect.width > chartRect.width - 4) {
+      left = clientX - chartRect.left - tooltipRect.width - 14;
+    }
+    // Clamp to chart bounds
+    if (top + tooltipRect.height > chartRect.height - 4) {
+      top = chartRect.height - tooltipRect.height - 4;
+    }
+    if (left < 4) left = 4;
+    if (top < 4) top = 4;
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+  }
+  function hideTooltip() {
+    tooltipEl.hidden = true;
+  }
+
+  // Translate screen coords to SVG user-space coords
+  function svgPoint(evt) {
+    const pt = svgEl.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    const ctm = svgEl.getScreenCTM();
+    if (!ctm) return null;
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  // Find nearest point to a given SVG coordinate
+  function nearestPoint(svgX, svgY) {
+    let best = null, bestDist = Infinity;
+    for (const p of pointRegistry) {
+      const dx = p.x - svgX, dy = p.y - svgY;
+      const dist = dx * dx + dy * dy;
+      if (dist < bestDist) { bestDist = dist; best = p; }
+    }
+    return best;
+  }
+
+  // Hover over the SVG hit area → find closest point, highlight its candidate, show tooltip
+  hitArea.addEventListener('mousemove', (evt) => {
+    const sp = svgPoint(evt);
+    if (!sp) return;
+    const nearest = nearestPoint(sp.x, sp.y);
+    if (!nearest) return;
+    // Only highlight when reasonably close — avoid jumpiness far from any line
+    const dx = nearest.x - sp.x, dy = nearest.y - sp.y;
+    const screenPixelDist = Math.sqrt(dx * dx + dy * dy) * (chartEl.getBoundingClientRect().width / W);
+    if (screenPixelDist > 40) {
+      clearDim();
+      hideTooltip();
+      return;
+    }
+    dimExcept(nearest.candId);
+    showTooltip(nearest, evt.clientX, evt.clientY);
+  });
+  hitArea.addEventListener('mouseleave', () => {
+    clearDim();
+    hideTooltip();
+  });
+
+  // Legend row hover → highlight that candidate (no tooltip, just dim others)
+  legendEl.querySelectorAll('.legend-row').forEach(row => {
+    row.addEventListener('mouseenter', () => dimExcept(row.dataset.cand));
+    row.addEventListener('mouseleave', () => clearDim());
   });
 }
 
@@ -663,15 +774,21 @@ function renderTimeline() {
       if (result.candidate_id === 'no_opinion') dot.classList.add('tl-point-hollow');
       if (result.candidate_id === 'unknown') dot.classList.add('tl-point-unknown');
       dot.style.left = `${x}%`;
+      dot.style.borderColor = cand.color;
       if (result.candidate_id !== 'no_opinion') dot.style.background = cand.color;
-      else dot.style.borderColor = cand.color;
 
-      dot.title = `${new Date(snap.timestamp).toLocaleString(currentLang)} — ${result.candidate}`;
+      const displayName = result.candidate_id === 'no_opinion' ? t('no_opinion_label') : result.candidate;
+      dot.title = `${new Date(snap.timestamp).toLocaleString(currentLang)} — ${displayName}`;
       dot.setAttribute('aria-label', dot.title);
       dot.dataset.timestamp = snap.timestamp;
       dot.dataset.provider = pid;
       dot.addEventListener('click', () => showDetail(snap, result));
       track.appendChild(dot);
+
+      // Attach candidate image to the timeline dot
+      if (result.candidate_id && isRealCandidate(result.candidate_id) && cand.wiki) {
+        attachCandidateImage(dot, cand);
+      }
     }
 
     row.appendChild(track);

@@ -529,11 +529,18 @@ main {
   width: 100%;
   min-height: 320px;
 }
+.consensus-chart-container {
+  position: relative;
+  width: 100%;
+}
 .consensus-chart svg {
   width: 100%;
   height: auto;
   display: block;
   font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+.chart-hit-area {
+  cursor: crosshair;
 }
 .chart-empty {
   color: var(--fg-dim);
@@ -557,13 +564,77 @@ main {
 }
 .chart-x-label-last { font-weight: 600; fill: var(--fg-dim); }
 .chart-line {
-  transition: opacity 0.2s var(--ease);
+  transition: opacity 0.2s var(--ease), stroke-width 0.2s var(--ease);
+}
+.chart-line.highlighted {
+  stroke-width: 3.5;
 }
 .chart-dot {
-  transition: opacity 0.2s var(--ease);
+  transition: opacity 0.2s var(--ease), r 0.2s var(--ease);
+}
+.chart-dot:not(.chart-dot-last) {
+  opacity: 0;
+}
+.chart-dot.highlighted,
+.chart-line.dimmed ~ .chart-dot.highlighted {
+  opacity: 1 !important;
+  r: 5;
 }
 .chart-line.dimmed, .chart-dot.dimmed {
-  opacity: 0.18;
+  opacity: 0.15;
+}
+
+/* Tooltip */
+.chart-tooltip {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  background: rgba(12, 14, 20, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  min-width: 160px;
+  transition: opacity 0.12s var(--ease);
+}
+.chart-tooltip[hidden] { display: none; }
+.tooltip-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.tooltip-row:last-child { margin-bottom: 0; }
+.tooltip-name {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tooltip-stat {
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 2px;
+}
+.tooltip-pct {
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.tooltip-count {
+  font-size: 0.72rem;
+  color: var(--fg-dimmer);
+  font-variant-numeric: tabular-nums;
+}
+.tooltip-date {
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
 }
 
 /* Legend */
@@ -582,11 +653,22 @@ main {
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.18s var(--ease);
+  border: 1px solid transparent;
 }
-.legend-row:hover { background: rgba(255, 255, 255, 0.04); }
+.legend-row:hover,
+.legend-row.highlighted {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+}
 .legend-left {
   display: flex; align-items: center; gap: 8px;
   min-width: 0; flex: 1;
+}
+.legend-swatch {
+  display: inline-block;
+  width: 12px; height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 .legend-name {
   font-size: 0.86rem;
@@ -650,7 +732,7 @@ main {
   grid-template-columns: 120px 1fr;
   gap: 0.75rem;
   align-items: center;
-  min-height: 40px;
+  min-height: 50px;
 }
 .tl-label {
   text-align: right;
@@ -676,7 +758,7 @@ main {
 }
 .tl-track {
   position: relative;
-  height: 34px;
+  height: 44px;
   background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06), rgba(255,255,255,0.03));
   border-radius: 8px;
   overflow: visible;
@@ -684,22 +766,35 @@ main {
 .tl-point {
   position: absolute;
   top: 50%; transform: translate(-50%, -50%);
-  width: 14px; height: 14px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   border: 2px solid var(--bg);
   cursor: pointer;
   transition: all 0.2s var(--ease);
+  padding: 0;
+  overflow: hidden;
+  background-position: center top;
+  background-size: cover;
+}
+.tl-point .candidate-img-inner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  pointer-events: none;
 }
 .tl-point-hollow  { background: transparent !important; border-width: 2px; }
 .tl-point-unknown { opacity: 0.5; }
 .tl-point:hover {
-  transform: translate(-50%, -50%) scale(1.4);
+  transform: translate(-50%, -50%) scale(1.25);
   z-index: 2;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.10);
+  border-width: 2px;
 }
 .tl-point.selected {
-  transform: translate(-50%, -50%) scale(1.5);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18);
+  transform: translate(-50%, -50%) scale(1.35);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
   z-index: 3;
 }
 .tl-axis {
