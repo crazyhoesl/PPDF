@@ -113,7 +113,7 @@ function applyLang() {
   // Prompt text in the footer section — uses textContent (newlines preserved by <pre>)
   const promptEl = document.getElementById('promptText');
   if (promptEl) promptEl.textContent = t('prompt_text');
-  lastNextPollMinute = -1; // force re-render on next tick with new locale
+  lastNextPollHour = -1; // force re-render on next tick with new locale
   renderNextPoll();
   if (latestData) { renderConsensus(latestData); renderLatest(latestData); }
   if (allSnapshots.length) { renderConsensusChart(); renderTimeline(); renderTally(); }
@@ -157,36 +157,34 @@ function tickCountdown() {
   el.m.textContent = String(mins).padStart(2, '0');
   el.s.textContent = String(secs).padStart(2, '0');
 
-  // Refresh the "next poll" line only when the minute rolls over — no need
-  // to re-render a text that changes once per 60s at 1Hz.
-  const nowMin = Math.floor(Date.now() / 60000);
-  if (nowMin !== lastNextPollMinute) {
-    lastNextPollMinute = nowMin;
+  // Refresh the "next poll" line once an hour — its value only flips when the
+  // day boundary passes, so per-second or per-minute updates would be wasted.
+  const nowHour = Math.floor(Date.now() / 3600_000);
+  if (nowHour !== lastNextPollHour) {
+    lastNextPollHour = nowHour;
     renderNextPoll();
   }
 }
 
 // ── Next poll indicator ──────────────────────────────────────────────
-// Daily cron is `0 7 * * *` — 07:00 UTC. We compute the next occurrence,
-// render it in the user's locale, and show a relative "in Xh Ymin" too.
-let lastNextPollMinute = -1;
+// The cron is scheduled for 07:00 UTC daily, but GitHub Actions cron is not
+// reliable — it routinely drifts 1–3 hours under load. We show an approximate
+// time window rather than a misleadingly precise countdown.
+let lastNextPollHour = -1;
 
 function computeNextRun() {
   const now = new Date();
-  const next = new Date(Date.UTC(
+  // Schedule target: 07:00 UTC. Add a 1h pessimistic buffer (08:00 UTC) so
+  // "today" doesn't flip to "tomorrow" prematurely while the cron is still
+  // pending and likely to fire any minute.
+  const today = new Date(Date.UTC(
     now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 7, 0, 0, 0
   ));
-  if (next.getTime() <= now.getTime()) next.setUTCDate(next.getUTCDate() + 1);
-  return next;
-}
-
-function formatRelative(ms) {
-  const mins = Math.max(0, Math.floor(ms / 60000));
-  if (mins < 1)  return t('np_soon');
-  if (mins < 60) return `${mins} min`;
-  const hours = Math.floor(mins / 60);
-  const rem = mins % 60;
-  return rem > 0 ? `${hours}h ${rem}min` : `${hours}h`;
+  const cutoff = today.getTime() + 60 * 60 * 1000; // 1h grace
+  if (now.getTime() < cutoff) return today;
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return tomorrow;
 }
 
 function renderNextPoll() {
@@ -194,7 +192,6 @@ function renderNextPoll() {
   if (!el) return;
   const nextRun = computeNextRun();
   const now = new Date();
-  const diffMs = nextRun.getTime() - now.getTime();
 
   // "today" vs "tomorrow" based on the *user's* local calendar
   const sameDay = nextRun.getFullYear() === now.getFullYear()
@@ -202,16 +199,15 @@ function renderNextPoll() {
                && nextRun.getDate() === now.getDate();
   const whenLabel = sameDay ? t('np_today') : t('np_tomorrow');
 
+  // Approximate scheduled time (with ~ prefix), localized
   const timeFmt = new Intl.DateTimeFormat(currentLang, { hour: '2-digit', minute: '2-digit' });
-  const timeStr = timeFmt.format(nextRun);
-  const relStr = formatRelative(diffMs);
+  const timeStr = '~' + timeFmt.format(nextRun);
 
   el.innerHTML = `
     <span class="np-label">${escapeHtml(t('np_label'))}</span>
     <span class="np-sep">·</span>
     <span class="np-when">${escapeHtml(whenLabel)} ${escapeHtml(timeStr)}</span>
-    <span class="np-sep">·</span>
-    <span class="np-relative">${escapeHtml(t('np_in'))} ${escapeHtml(relStr)}</span>
+    <span class="np-tooltip" title="${escapeHtml(t('np_tooltip'))}" aria-label="${escapeHtml(t('np_tooltip'))}">?</span>
   `;
 }
 
