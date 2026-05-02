@@ -207,7 +207,14 @@ function renderNextPoll() {
     <span class="np-label">${escapeHtml(t('np_label'))}</span>
     <span class="np-sep">·</span>
     <span class="np-when">${escapeHtml(whenLabel)} ${escapeHtml(timeStr)}</span>
-    <span class="np-tooltip" title="${escapeHtml(t('np_tooltip'))}" aria-label="${escapeHtml(t('np_tooltip'))}">?</span>
+    <span class="np-info" tabindex="0" aria-label="${escapeHtml(t('np_tooltip'))}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      <span class="np-info-bubble" role="tooltip">${escapeHtml(t('np_tooltip'))}</span>
+    </span>
   `;
 }
 
