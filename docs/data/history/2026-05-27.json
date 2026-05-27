@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-05-27T10:51:02.925Z",
+    "date": "2026-05-27",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nContext: This is an AI-comparison poll. The same question is sent daily to Gemini 3.1 Pro, Mistral, xAI Grok, OpenAI (GPT-5.4), and Anthropic (Claude Opus 4.7). The point is to see how different models guess about a real future event — refusing to speculate defeats the whole purpose of the project.\n\nBased on what you know about French politics (party leaders, recent events including Marine Le Pen's March 2025 ineligibility ruling, polling trends, coalition dynamics, incumbent constraints), commit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-05-27T10:50:51.819Z",
+        "durationMs": 11106,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks highly in early popularity polls among center-right and centrist voters, though the political landscape remains highly volatile.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks highly in early popularity polls among center-right and centrist voters, though the political landscape remains highly volatile.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-05-27T10:50:51.843Z",
+        "durationMs": 2147,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Jordan Bardella\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"As the new leader of the National Rally following Marine Le Pen's ineligibility, Bardella is positioned to capitalize on the party's rising popularity and anti-incumbent sentiment.\"\n}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "As the new leader of the National Rally following Marine Le Pen's ineligibility, Bardella is positioned to capitalize on the party's rising popularity and anti-incumbent sentiment.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-05-27T10:50:51.844Z",
+        "durationMs": 3618,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen ruled ineligible, Bardella leads the rising Rassemblement National in current polling trends.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen ruled ineligible, Bardella leads the rising Rassemblement National in current polling trends.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.4",
+        "timestamp": "2026-05-27T10:50:51.845Z",
+        "durationMs": 2832,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"medium\",\"reasoning\":\"Marine Le Pen's March 2025 ineligibility makes Bardella the most likely unified far-right standard-bearer in a fragmented field where RN remains structurally strongest in first-round polling.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "Marine Le Pen's March 2025 ineligibility makes Bardella the most likely unified far-right standard-bearer in a fragmented field where RN remains structurally strongest in first-round polling.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-opus-4-7",
+        "timestamp": "2026-05-27T10:50:51.846Z",
+        "durationMs": 3158,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"With Marine Le Pen ruled ineligible in March 2025, RN's young party president Bardella becomes the default standard-bearer for the consistently polling-leading far-right bloc in a fragmented field.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen ruled ineligible in March 2025, RN's young party president Bardella becomes the default standard-bearer for the consistently polling-leading far-right bloc in a fragmented field.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
