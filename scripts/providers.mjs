@@ -121,7 +121,7 @@ async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
   // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
   // accept arbitrary temperature values — omit temperature to use the default.
   const body = {
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     messages: [{ role: 'user', content: prompt }],
     max_completion_tokens: 2000,
     response_format: { type: 'json_object' },
@@ -149,7 +149,7 @@ async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
 // final text content.
 async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
   const body = {
-    model: 'claude-opus-4-7',
+    model: 'claude-opus-4-8',
     max_tokens: 8000,
     thinking: { type: 'adaptive' },
     messages: [{ role: 'user', content: prompt }],
@@ -196,14 +196,14 @@ export const providers = [
   {
     id: 'openai',
     name: 'OpenAI',
-    model: 'gpt-5.4',
+    model: 'gpt-5.5',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
   },
   {
     id: 'claude',
     name: 'Anthropic Claude',
-    model: 'claude-opus-4-7',
+    model: 'claude-opus-4-8',
     envKey: 'CLAUDE_API_KEY',
     call: callClaude,
   },

@@ -41,6 +41,17 @@ function activeResults(snapshot) {
   return (snapshot?.results || []).filter(r => isActiveProvider(r.provider));
 }
 
+// Model version changes over the project's life. Rendered as subtle vertical
+// markers on the timeline so viewers can see "before this date it was the old
+// model, after it the new one". `date` is the ISO day the new model went live.
+const MODEL_SWITCHES = [
+  {
+    date: '2026-05-29',
+    providers: ['openai', 'claude'],
+    label: 'GPT-5.4→5.5 · Opus 4.7→4.8',
+  },
+];
+
 // ── Wikipedia image fetching with in-memory + localStorage cache ─────
 const imageCache = {};
 function getCandidateImage(wikiSlug) {
@@ -768,6 +779,20 @@ function renderTimeline() {
     const track = document.createElement('div');
     track.className = 'tl-track';
 
+    // Model-switch markers for this provider (vertical line + label)
+    for (const sw of MODEL_SWITCHES) {
+      if (!sw.providers.includes(pid)) continue;
+      const swTime = new Date(sw.date + 'T00:00:00Z').getTime();
+      // Only draw if it falls within the visible time span
+      if (swTime < first || swTime > last) continue;
+      const sx = ((swTime - first) / span) * 100;
+      const marker = document.createElement('div');
+      marker.className = 'tl-switch';
+      marker.style.left = `${sx}%`;
+      marker.title = sw.label;
+      track.appendChild(marker);
+    }
+
     for (const snap of allSnapshots) {
       const result = activeResults(snap).find(r => r.provider === pid);
       if (!result || !result.ok) continue;
@@ -806,6 +831,23 @@ function renderTimeline() {
   const fmt = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short', year: '2-digit' });
   axis.innerHTML = `<span>${fmt.format(new Date(first))}</span><span>${fmt.format(new Date(last))}</span>`;
   tl.appendChild(axis);
+
+  // Model-switch legend — explains the dashed vertical markers
+  const visibleSwitches = MODEL_SWITCHES.filter(sw => {
+    const swTime = new Date(sw.date + 'T00:00:00Z').getTime();
+    return swTime >= first && swTime <= last;
+  });
+  if (visibleSwitches.length) {
+    const legend = document.createElement('div');
+    legend.className = 'tl-switch-legend';
+    const dateFmt = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short', year: 'numeric' });
+    const items = visibleSwitches.map(sw => {
+      const d = dateFmt.format(new Date(sw.date + 'T12:00:00Z'));
+      return `<span class="tl-switch-item"><span class="tl-switch-swatch"></span>${escapeHtml(d)} — ${escapeHtml(sw.label)}</span>`;
+    }).join('');
+    legend.innerHTML = `<span class="tl-switch-legend-title">${escapeHtml(t('switch_legend'))}</span>${items}`;
+    tl.appendChild(legend);
+  }
 }
 
 function showDetail(snap, result) {

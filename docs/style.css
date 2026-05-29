@@ -861,6 +861,33 @@ main {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
   z-index: 3;
 }
+/* Model-switch marker: dashed vertical line spanning the track */
+.tl-switch {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 0;
+  border-left: 1.5px dashed var(--fr-red, #ef4135);
+  opacity: 0.55;
+  pointer-events: auto;
+  z-index: 1;
+  cursor: help;
+}
+.tl-switch::before {
+  /* little diamond at the top of the line */
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--fr-red, #ef4135);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 1px;
+}
+.tl-switch:hover {
+  opacity: 0.9;
+}
 .tl-axis {
   display: flex; justify-content: space-between;
   margin-top: 0.75rem;
@@ -868,6 +895,45 @@ main {
   font-size: 0.7rem;
   color: var(--fg-dimmer);
   letter-spacing: 0.05em;
+}
+/* Model-switch legend below the axis */
+.tl-switch-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  margin-top: 0.9rem;
+  padding-left: 128px;
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+}
+.tl-switch-legend-title {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.66rem;
+  color: var(--fg-dimmer);
+  font-weight: 500;
+}
+.tl-switch-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.tl-switch-swatch {
+  display: inline-block;
+  width: 0;
+  height: 12px;
+  border-left: 1.5px dashed var(--fr-red, #ef4135);
+  position: relative;
+}
+.tl-switch-swatch::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  width: 5px; height: 5px;
+  background: var(--fr-red, #ef4135);
+  transform: translateX(-50%) rotate(45deg);
 }
 
 .timeline-detail {
@@ -954,6 +1020,7 @@ main {
   .tl-row { grid-template-columns: 80px 1fr; }
   .tl-label { font-size: 0.65rem; }
   .tl-axis { padding-left: 88px; font-size: 0.62rem; }
+  .tl-switch-legend { padding-left: 88px; font-size: 0.66rem; }
   .tally-row { grid-template-columns: 120px 1fr 50px; gap: 0.5rem; }
   .tally-name { font-size: 0.85rem; }
   .countdown-values { gap: 0.2rem; }
