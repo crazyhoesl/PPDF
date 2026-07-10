@@ -120,8 +120,10 @@ async function callGrok(apiKey, prompt, { timeoutMs } = {}) {
 async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
   // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
   // accept arbitrary temperature values — omit temperature to use the default.
+  // gpt-5.6-sol is the flagship tier (the bare `gpt-5.6` alias routes here);
+  // we pin the explicit ID so routing stays predictable.
   const body = {
-    model: 'gpt-5.5',
+    model: 'gpt-5.6-sol',
     messages: [{ role: 'user', content: prompt }],
     max_completion_tokens: 2000,
     response_format: { type: 'json_object' },
@@ -142,16 +144,25 @@ async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
 }
 
 // ── Anthropic / Claude ───────────────────────────────────────────────────────
-// Opus 4.7 removes temperature entirely (400 error if set) and uses a new
-// tokenizer (~1–1.35x more tokens per text). Adaptive thinking is off by
-// default — we enable it to get the model's best reasoning for this task.
-// Thinking blocks are omitted from response by default, so we just get the
-// final text content.
+// Claude Fable 5 (Mythos-class) differs from the Opus adapter in three ways:
+//   1. Adaptive thinking is ALWAYS on. The `thinking` param must stay unset —
+//      `thinking: {type: "disabled"}` is unsupported, and setting it to
+//      "adaptive" is redundant. Thinking depth is controlled via `effort`.
+//   2. Safety classifiers can decline a request. A refusal comes back as
+//      HTTP 200 with stop_reason: "refusal" — NOT an error status. We must
+//      detect it explicitly or the empty-text check would report a confusing
+//      "empty response" instead of the real cause.
+//   3. Raw chain-of-thought is never returned. Thinking blocks come back with
+//      an empty `thinking` field by default, so filtering on type === 'text'
+//      still gets us exactly the final JSON.
+// No `temperature` (unsupported since Opus 4.7).
 async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
   const body = {
-    model: 'claude-opus-4-8',
+    model: 'claude-fable-5',
     max_tokens: 8000,
-    thinking: { type: 'adaptive' },
+    // Cheapest effort tier that still reasons — this task is a single name
+    // plus one sentence, so deep thinking is wasted spend at $50/MTok output.
+    effort: 'low',
     messages: [{ role: 'user', content: prompt }],
   };
   const data = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
@@ -164,9 +175,14 @@ async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
     body: JSON.stringify(body),
   }, timeoutMs);
 
+  const stop = data?.stop_reason;
+  // Fable 5 refusals arrive as a successful 200 — surface them clearly.
+  if (stop === 'refusal') {
+    throw new Error('claude: request declined by safety classifier');
+  }
+
   const blocks = Array.isArray(data?.content) ? data.content : [];
   const text = blocks.filter(b => b?.type === 'text').map(b => b.text).join('\n').trim();
-  const stop = data?.stop_reason;
   if (!text) throw new Error(`claude: empty response (stop_reason: ${stop || 'unknown'})`);
   return text;
 }
@@ -196,14 +212,14 @@ export const providers = [
   {
     id: 'openai',
     name: 'OpenAI',
-    model: 'gpt-5.5',
+    model: 'gpt-5.6-sol',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
   },
   {
     id: 'claude',
     name: 'Anthropic Claude',
-    model: 'claude-opus-4-8',
+    model: 'claude-fable-5',
     envKey: 'CLAUDE_API_KEY',
     call: callClaude,
   },
