@@ -120,10 +120,12 @@ async function callGrok(apiKey, prompt, { timeoutMs } = {}) {
 async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
   // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
   // accept arbitrary temperature values — omit temperature to use the default.
-  // gpt-5.6-sol is the flagship tier (the bare `gpt-5.6` alias routes here);
-  // we pin the explicit ID so routing stays predictable.
+  //
+  // NOTE: gpt-5.6-sol went GA on 2026-07-09 but the rollout is gradual; this
+  // org still gets a 404 ("does not exist or you do not have access to it").
+  // Swap the model string once the account has access — nothing else changes.
   const body = {
-    model: 'gpt-5.6-sol',
+    model: 'gpt-5.5',
     messages: [{ role: 'user', content: prompt }],
     max_completion_tokens: 2000,
     response_format: { type: 'json_object' },
@@ -160,9 +162,10 @@ async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
   const body = {
     model: 'claude-fable-5',
     max_tokens: 8000,
-    // Cheapest effort tier that still reasons — this task is a single name
+    // `effort` lives inside output_config — passing it top-level returns a 400.
+    // Low is the cheapest tier that still reasons; this task is a single name
     // plus one sentence, so deep thinking is wasted spend at $50/MTok output.
-    effort: 'low',
+    output_config: { effort: 'low' },
     messages: [{ role: 'user', content: prompt }],
   };
   const data = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
@@ -212,7 +215,7 @@ export const providers = [
   {
     id: 'openai',
     name: 'OpenAI',
-    model: 'gpt-5.6-sol',
+    model: 'gpt-5.5',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
   },

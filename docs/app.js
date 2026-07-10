@@ -52,8 +52,8 @@ const MODEL_SWITCHES = [
   },
   {
     date: '2026-07-10',
-    providers: ['openai', 'claude'],
-    label: 'GPT-5.5→5.6 Sol · Opus 4.8→Fable 5',
+    providers: ['claude'],
+    label: 'Opus 4.8→Fable 5',
   },
 ];
 
