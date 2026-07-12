@@ -55,6 +55,11 @@ const MODEL_SWITCHES = [
     providers: ['claude'],
     label: 'Opus 4.8→Fable 5',
   },
+  {
+    date: '2026-07-12',
+    providers: ['openai'],
+    label: 'GPT-5.5→5.6 Sol',
+  },
 ];
 
 // ── Wikipedia image fetching with in-memory + localStorage cache ─────

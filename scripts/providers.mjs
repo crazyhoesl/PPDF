@@ -120,12 +120,11 @@ async function callGrok(apiKey, prompt, { timeoutMs } = {}) {
 async function callOpenAI(apiKey, prompt, { timeoutMs } = {}) {
   // GPT-5 series requires max_completion_tokens (not max_tokens) and does not
   // accept arbitrary temperature values — omit temperature to use the default.
-  //
-  // NOTE: gpt-5.6-sol went GA on 2026-07-09 but the rollout is gradual; this
-  // org still gets a 404 ("does not exist or you do not have access to it").
-  // Swap the model string once the account has access — nothing else changes.
+  // gpt-5.6-sol is the flagship tier; we pin the explicit ID rather than the
+  // bare `gpt-5.6` alias so routing stays predictable. (Org access verified
+  // 2026-07-12 — rollout reached this account ~3 days after the 07-09 GA.)
   const body = {
-    model: 'gpt-5.5',
+    model: 'gpt-5.6-sol',
     messages: [{ role: 'user', content: prompt }],
     max_completion_tokens: 2000,
     response_format: { type: 'json_object' },
@@ -215,7 +214,7 @@ export const providers = [
   {
     id: 'openai',
     name: 'OpenAI',
-    model: 'gpt-5.5',
+    model: 'gpt-5.6-sol',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
   },
