@@ -332,7 +332,7 @@ main {
   justify-content: center;
   margin-left: 4px;
   color: var(--fg-dimmer);
-  cursor: help;
+  cursor: pointer;
   transition: color 0.18s var(--ease);
   outline: none;
 }
@@ -871,7 +871,17 @@ main {
   opacity: 0.55;
   pointer-events: auto;
   z-index: 1;
-  cursor: help;
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease), filter 0.2s var(--ease);
+}
+/* Invisible widened hit zone — a 1.5px line is miserable to hover precisely */
+.tl-switch::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: -9px;
+  right: -9px;
 }
 .tl-switch::before {
   /* little diamond at the top of the line */
@@ -884,9 +894,90 @@ main {
   background: var(--fr-red, #ef4135);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 1px;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 .tl-switch:hover {
-  opacity: 0.9;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(239, 65, 53, 0.55));
+  z-index: 20;
+}
+.tl-switch:hover::before {
+  transform: translateX(-50%) rotate(45deg) scale(1.5);
+  box-shadow: 0 0 10px rgba(239, 65, 53, 0.7);
+}
+/* Custom tooltip bubble — replaces the sluggish native title */
+.tl-switch-tip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px) scale(0.96);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(12, 14, 20, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(239, 65, 53, 0.45);
+  border-radius: 10px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 18px rgba(239, 65, 53, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.tl-switch-tip-date {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fr-red, #ef4135);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tl-switch-tip-label {
+  font-size: 0.8rem;
+  color: var(--fg);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+/* Arrow pointing down at the diamond */
+.tl-switch-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(239, 65, 53, 0.45);
+}
+.tl-switch:hover .tl-switch-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+/* Edge-aware alignment: markers near the track edges shift the bubble inward */
+.tl-switch.tip-left .tl-switch-tip {
+  left: auto;
+  right: -8px;
+  transform: translateY(5px) scale(0.96);
+}
+.tl-switch.tip-left:hover .tl-switch-tip {
+  transform: translateY(0) scale(1);
+}
+.tl-switch.tip-left .tl-switch-tip::after {
+  left: auto;
+  right: 10px;
+  transform: none;
+}
+.tl-switch.tip-right .tl-switch-tip {
+  left: -8px;
+  transform: translateY(5px) scale(0.96);
+}
+.tl-switch.tip-right:hover .tl-switch-tip {
+  transform: translateY(0) scale(1);
+}
+.tl-switch.tip-right .tl-switch-tip::after {
+  left: 10px;
+  transform: none;
 }
 .tl-axis {
   display: flex; justify-content: space-between;

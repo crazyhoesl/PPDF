@@ -789,7 +789,7 @@ function renderTimeline() {
     const track = document.createElement('div');
     track.className = 'tl-track';
 
-    // Model-switch markers for this provider (vertical line + label)
+    // Model-switch markers for this provider (vertical line + custom tooltip)
     for (const sw of MODEL_SWITCHES) {
       if (!sw.providers.includes(pid)) continue;
       const swTime = new Date(sw.date + 'T00:00:00Z').getTime();
@@ -798,8 +798,16 @@ function renderTimeline() {
       const sx = ((swTime - first) / span) * 100;
       const marker = document.createElement('div');
       marker.className = 'tl-switch';
+      // Near the edges the centered bubble would clip — align it inward.
+      if (sx > 78) marker.classList.add('tip-left');
+      else if (sx < 22) marker.classList.add('tip-right');
       marker.style.left = `${sx}%`;
-      marker.title = sw.label;
+      const dateFmt = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short', year: 'numeric' });
+      const dateStr = dateFmt.format(new Date(sw.date + 'T12:00:00Z'));
+      marker.innerHTML = `<span class="tl-switch-tip" role="tooltip">
+        <span class="tl-switch-tip-date">${escapeHtml(dateStr)}</span>
+        <span class="tl-switch-tip-label">${escapeHtml(sw.label)}</span>
+      </span>`;
       track.appendChild(marker);
     }
 
