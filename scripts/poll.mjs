@@ -16,8 +16,6 @@ const HISTORY_DIR = path.join(DATA_DIR, 'history');
 
 const PROMPT = `Task: Pick the single most likely winner of the 2027 French presidential election.
 
-Context: This is an AI-comparison poll. The same question is sent daily to Gemini 3.1 Pro, Mistral, xAI Grok, OpenAI (GPT-5.6 Sol), and Anthropic (Claude Fable 5). The point is to see how different models guess about a real future event — refusing to speculate defeats the whole purpose of the project.
-
 Commit to ONE name.
 
 Ground rules:
