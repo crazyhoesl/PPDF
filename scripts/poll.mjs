@@ -148,7 +148,13 @@ async function runProvider(provider) {
       return result;
     }
 
-    // 30-second hard timeout per provider, with one retry on network/5xx/429
+    // 30-second hard timeout per provider, with one retry on network/5xx/429.
+    // HTTP 401 is also retried once: normally auth failures are permanent, but
+    // OpenAI has been observed returning transient 401 "insufficient
+    // permissions" during internal auth-service blips (seen 2026-07-14 — the
+    // same key succeeded minutes later). One retry with a longer backoff
+    // costs nothing and self-heals those runs; a genuinely bad key still
+    // fails after the second attempt.
     let text = null;
     let lastErr = null;
     for (let attempt = 1; attempt <= 2; attempt++) {
@@ -159,10 +165,11 @@ async function runProvider(provider) {
       } catch (err) {
         lastErr = err;
         const msg = String(err?.message ?? '');
-        const retriable = /HTTP 5\d\d|HTTP 429|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
+        const retriable = /HTTP 5\d\d|HTTP 429|HTTP 401|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
         if (attempt === 1 && retriable) {
-          // Small backoff — 2s for 429 (more aggressive spacing), 1.5s otherwise
-          const delay = /429/.test(msg) ? 2500 : 1500;
+          // Backoff: 4s for 401 (auth blips need a moment), 2.5s for 429,
+          // 1.5s otherwise
+          const delay = /401/.test(msg) ? 4000 : /429/.test(msg) ? 2500 : 1500;
           await new Promise(r => setTimeout(r, delay));
           continue;
         }
