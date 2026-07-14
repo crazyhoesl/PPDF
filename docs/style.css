@@ -863,11 +863,13 @@ main {
 }
 /* Model-switch marker: dashed vertical line spanning the track */
 .tl-switch {
+  --switch-color: var(--fr-red, #ef4135);
+  --switch-glow: rgba(239, 65, 53, 0.55);
   position: absolute;
   top: -3px;
   bottom: -3px;
   width: 0;
-  border-left: 1.5px dashed var(--fr-red, #ef4135);
+  border-left: 1.5px dashed var(--switch-color);
   opacity: 0.55;
   pointer-events: auto;
   z-index: 1;
@@ -891,19 +893,24 @@ main {
   left: 50%;
   width: 6px;
   height: 6px;
-  background: var(--fr-red, #ef4135);
+  background: var(--switch-color);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 1px;
   transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
 .tl-switch:hover {
   opacity: 1;
-  filter: drop-shadow(0 0 6px rgba(239, 65, 53, 0.55));
+  filter: drop-shadow(0 0 6px var(--switch-glow));
   z-index: 20;
 }
 .tl-switch:hover::before {
   transform: translateX(-50%) rotate(45deg) scale(1.5);
-  box-shadow: 0 0 10px rgba(239, 65, 53, 0.7);
+  box-shadow: 0 0 10px var(--switch-glow);
+}
+/* Prompt-change markers render in tricolore blue instead of red */
+.tl-switch.tl-switch-prompt {
+  --switch-color: #4696e8;
+  --switch-glow: rgba(70, 150, 232, 0.5);
 }
 /* Custom tooltip bubble — replaces the sluggish native title */
 .tl-switch-tip {
@@ -917,11 +924,11 @@ main {
   background: rgba(12, 14, 20, 0.96);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(239, 65, 53, 0.45);
+  border: 1px solid var(--switch-color);
   border-radius: 10px;
   padding: 8px 12px;
   white-space: nowrap;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 18px rgba(239, 65, 53, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 18px var(--switch-glow);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
@@ -930,7 +937,7 @@ main {
   font-size: 0.66rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--fr-red, #ef4135);
+  color: var(--switch-color);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -948,7 +955,7 @@ main {
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: rgba(239, 65, 53, 0.45);
+  border-top-color: var(--switch-color);
 }
 .tl-switch:hover .tl-switch-tip {
   opacity: 1;
@@ -1012,10 +1019,11 @@ main {
   font-variant-numeric: tabular-nums;
 }
 .tl-switch-swatch {
+  --switch-color: var(--fr-red, #ef4135);
   display: inline-block;
   width: 0;
   height: 12px;
-  border-left: 1.5px dashed var(--fr-red, #ef4135);
+  border-left: 1.5px dashed var(--switch-color);
   position: relative;
 }
 .tl-switch-swatch::before {
@@ -1023,8 +1031,11 @@ main {
   position: absolute;
   top: -3px; left: 50%;
   width: 5px; height: 5px;
-  background: var(--fr-red, #ef4135);
+  background: var(--switch-color);
   transform: translateX(-50%) rotate(45deg);
+}
+.tl-switch-swatch-prompt {
+  --switch-color: #4696e8;
 }
 
 .timeline-detail {

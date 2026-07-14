@@ -41,9 +41,12 @@ function activeResults(snapshot) {
   return (snapshot?.results || []).filter(r => isActiveProvider(r.provider));
 }
 
-// Model version changes over the project's life. Rendered as subtle vertical
-// markers on the timeline so viewers can see "before this date it was the old
-// model, after it the new one". `date` is the ISO day the new model went live.
+// Model version changes and prompt revisions over the project's life.
+// Rendered as vertical markers on the timeline: red = model switch,
+// blue = prompt change. `date` is the first ISO day the change was live.
+// Entries without `providers` apply to every row (used for prompt changes).
+// `labelKey` (optional) resolves through i18n at render time; `label` is a
+// language-neutral fallback.
 const MODEL_SWITCHES = [
   {
     date: '2026-05-29',
@@ -59,6 +62,12 @@ const MODEL_SWITCHES = [
     date: '2026-07-12',
     providers: ['openai'],
     label: 'GPT-5.5→5.6 Sol',
+  },
+  {
+    date: '2026-07-13',
+    type: 'prompt',
+    labelKey: 'prompt_switch_label',
+    label: 'Prompt simplified',
   },
 ];
 
@@ -789,24 +798,27 @@ function renderTimeline() {
     const track = document.createElement('div');
     track.className = 'tl-track';
 
-    // Model-switch markers for this provider (vertical line + custom tooltip)
+    // Switch markers for this provider (vertical line + custom tooltip).
+    // Entries without `providers` (prompt changes) render on every row.
     for (const sw of MODEL_SWITCHES) {
-      if (!sw.providers.includes(pid)) continue;
+      if (sw.providers && !sw.providers.includes(pid)) continue;
       const swTime = new Date(sw.date + 'T00:00:00Z').getTime();
       // Only draw if it falls within the visible time span
       if (swTime < first || swTime > last) continue;
       const sx = ((swTime - first) / span) * 100;
       const marker = document.createElement('div');
       marker.className = 'tl-switch';
+      if (sw.type === 'prompt') marker.classList.add('tl-switch-prompt');
       // Near the edges the centered bubble would clip — align it inward.
       if (sx > 78) marker.classList.add('tip-left');
       else if (sx < 22) marker.classList.add('tip-right');
       marker.style.left = `${sx}%`;
       const dateFmt = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short', year: 'numeric' });
       const dateStr = dateFmt.format(new Date(sw.date + 'T12:00:00Z'));
+      const swLabel = sw.labelKey ? t(sw.labelKey) : sw.label;
       marker.innerHTML = `<span class="tl-switch-tip" role="tooltip">
         <span class="tl-switch-tip-date">${escapeHtml(dateStr)}</span>
-        <span class="tl-switch-tip-label">${escapeHtml(sw.label)}</span>
+        <span class="tl-switch-tip-label">${escapeHtml(swLabel)}</span>
       </span>`;
       track.appendChild(marker);
     }
@@ -861,7 +873,9 @@ function renderTimeline() {
     const dateFmt = new Intl.DateTimeFormat(currentLang, { day: 'numeric', month: 'short', year: 'numeric' });
     const items = visibleSwitches.map(sw => {
       const d = dateFmt.format(new Date(sw.date + 'T12:00:00Z'));
-      return `<span class="tl-switch-item"><span class="tl-switch-swatch"></span>${escapeHtml(d)} — ${escapeHtml(sw.label)}</span>`;
+      const swLabel = sw.labelKey ? t(sw.labelKey) : sw.label;
+      const swatchCls = sw.type === 'prompt' ? 'tl-switch-swatch tl-switch-swatch-prompt' : 'tl-switch-swatch';
+      return `<span class="tl-switch-item"><span class="${swatchCls}"></span>${escapeHtml(d)} — ${escapeHtml(swLabel)}</span>`;
     }).join('');
     legend.innerHTML = `<span class="tl-switch-legend-title">${escapeHtml(t('switch_legend'))}</span>${items}`;
     tl.appendChild(legend);
