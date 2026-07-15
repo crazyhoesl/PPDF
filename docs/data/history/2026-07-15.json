@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-07-15T09:05:14.454Z",
+    "date": "2026-07-15",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-07-15T09:05:05.799Z",
+        "durationMs": 8655,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks as one of France's most popular politicians and is well-positioned to unite the center and center-right in a second-round runoff.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks as one of France's most popular politicians and is well-positioned to unite the center and center-right in a second-round runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-07-15T09:05:05.825Z",
+        "durationMs": 3333,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"Former Prime Minister with strong centrist appeal and established political experience, positioning him as a unifying figure amid potential fragmentation.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "medium",
+        "reasoning": "Former Prime Minister with strong centrist appeal and established political experience, positioning him as a unifying figure amid potential fragmentation.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-07-15T09:05:05.826Z",
+        "durationMs": 7189,
+        "ok": true,
+        "raw": "{\"candidate\": \"Marine Le Pen\", \"confidence\": \"low\", \"reasoning\": \"Her party's strong performance in 2024 legislative elections positions her as the leading opposition contender for 2027.\"}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "Her party's strong performance in 2024 legislative elections positions her as the leading opposition contender for 2027.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-07-15T09:05:05.826Z",
+        "durationMs": 7315,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"medium\",\"reasoning\":\"He has led recent first-round polling as the likely National Rally candidate.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "He has led recent first-round polling as the likely National Rally candidate.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-07-15T09:05:05.828Z",
+        "durationMs": 5007,
+        "ok": true,
+        "raw": "{\"candidate\": \"Édouard Philippe\", \"confidence\": \"low\", \"reasoning\": \"He has consistently led favorability polls and is positioned as the centrist heir to Macron, who cannot run again, while Marine Le Pen faces legal ineligibility.\"}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently led favorability polls and is positioned as the centrist heir to Macron, who cannot run again, while Marine Le Pen faces legal ineligibility.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
