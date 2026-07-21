@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-07-21T09:22:51.180Z",
+    "date": "2026-07-21",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-07-21T09:22:41.557Z",
+        "durationMs": 9623,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Marine Le Pen\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"She currently leads early polling and benefits from a highly consolidated base, though the two-round voting system makes the final outcome highly uncertain.\"\n}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "She currently leads early polling and benefits from a highly consolidated base, though the two-round voting system makes the final outcome highly uncertain.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-07-21T09:22:41.582Z",
+        "durationMs": 1993,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"Former Prime Minister with strong centrist appeal and name recognition, positioning him as a unifying figure post-Macron era.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "medium",
+        "reasoning": "Former Prime Minister with strong centrist appeal and name recognition, positioning him as a unifying figure post-Macron era.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-07-21T09:22:41.583Z",
+        "durationMs": 7689,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"National Rally's strong 2024 EU election results position Bardella as the current polling frontrunner for 2027.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "National Rally's strong 2024 EU election results position Bardella as the current polling frontrunner for 2027.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-07-21T09:22:41.584Z",
+        "durationMs": 6070,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"Rassemblement National has held a sustained first-round polling lead, making its likely standard-bearer the narrow favorite.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "Rassemblement National has held a sustained first-round polling lead, making its likely standard-bearer the narrow favorite.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-07-21T09:22:41.585Z",
+        "durationMs": 4965,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen facing an ineligibility ruling, Bardella leads the consistently strongest polling bloc (RN) heading into 2027.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen facing an ineligibility ruling, Bardella leads the consistently strongest polling bloc (RN) heading into 2027.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
