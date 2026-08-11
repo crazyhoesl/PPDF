@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-08-11T08:03:59.966Z",
+    "date": "2026-08-11",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-08-11T08:03:45.694Z",
+        "durationMs": 8174,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Marine Le Pen\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"She currently leads early polling for 2027 and benefits from a highly fractured centrist and left-wing opposition following the end of Macron's term limit.\"\n}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "She currently leads early polling for 2027 and benefits from a highly fractured centrist and left-wing opposition following the end of Macron's term limit.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-08-11T08:03:45.721Z",
+        "durationMs": 1368,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"Former Prime Minister with strong centrist appeal and established political experience, positioning him as a unifying figure amid potential fragmentation.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "medium",
+        "reasoning": "Former Prime Minister with strong centrist appeal and established political experience, positioning him as a unifying figure amid potential fragmentation.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-08-11T08:03:45.722Z",
+        "durationMs": 5261,
+        "ok": true,
+        "raw": "{\"candidate\": \"Marine Le Pen\", \"confidence\": \"low\", \"reasoning\": \"She leads hypothetical 2027 polls as National Rally head capitalizing on anti-incumbent sentiment after 2024 legislative results.\"}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "She leads hypothetical 2027 polls as National Rally head capitalizing on anti-incumbent sentiment after 2024 legislative results.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-08-11T08:03:45.723Z",
+        "durationMs": 14242,
+        "ok": true,
+        "raw": "{\"candidate\":\"Édouard Philippe\",\"confidence\":\"low\",\"reasoning\":\"He has consistently polled as the strongest non–National Rally contender and could consolidate the anti-Rally vote in a runoff.\"}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently polled as the strongest non–National Rally contender and could consolidate the anti-Rally vote in a runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-08-11T08:03:45.724Z",
+        "durationMs": 4942,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen facing an ineligibility ruling and the RN consistently leading first-round polls, Bardella is the most likely beneficiary in 2027.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen facing an ineligibility ruling and the RN consistently leading first-round polls, Bardella is the most likely beneficiary in 2027.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
