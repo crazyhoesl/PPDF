@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-08-18T07:30:24.408Z",
+    "date": "2026-08-18",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-08-18T07:30:14.751Z",
+        "durationMs": 9657,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Marine Le Pen\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"She currently leads early polling for the 2027 election and benefits from the incumbent president's constitutional inability to run for a third consecutive term.\"\n}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "She currently leads early polling for the 2027 election and benefits from the incumbent president's constitutional inability to run for a third consecutive term.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-08-18T07:30:14.771Z",
+        "durationMs": 4512,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Jordan Bardella\",\n  \"confidence\": \"medium\",\n  \"reasoning\": \"As the current president of the National Rally (Rassemblement National), Bardella has strong momentum and growing mainstream appeal among right-leaning voters.\"\n}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "As the current president of the National Rally (Rassemblement National), Bardella has strong momentum and growing mainstream appeal among right-leaning voters.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-08-18T07:30:14.771Z",
+        "durationMs": 5648,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"Jordan Bardella leads early polls as the National Rally candidate after the party's strong 2024 legislative showing.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "Jordan Bardella leads early polls as the National Rally candidate after the party's strong 2024 legislative showing.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-08-18T07:30:14.772Z",
+        "durationMs": 6014,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"His National Rally consistently led national voting-intention polls while Marine Le Pen’s legal jeopardy positioned him as the party’s likely standard-bearer.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "His National Rally consistently led national voting-intention polls while Marine Le Pen’s legal jeopardy positioned him as the party’s likely standard-bearer.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-08-18T07:30:14.773Z",
+        "durationMs": 6513,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen facing an eligibility ban and Macron term-limited, Bardella leads early polls as the Rassemblement National's likely standard-bearer.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen facing an eligibility ban and Macron term-limited, Bardella leads early polls as the Rassemblement National's likely standard-bearer.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
