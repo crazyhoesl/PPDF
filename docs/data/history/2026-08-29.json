@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-08-29T12:53:40.959Z",
+    "date": "2026-08-29",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-08-29T12:53:31.792Z",
+        "durationMs": 8433,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks as one of France's most popular politicians and is well-positioned to unite the center and center-right electorate in a post-Macron landscape.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks as one of France's most popular politicians and is well-positioned to unite the center and center-right electorate in a post-Macron landscape.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-large-latest",
+        "timestamp": "2026-08-29T12:53:31.820Z",
+        "durationMs": 397,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 403: {\"object\":\"error\",\"message\":\"This model is not available in your subscription tier\",\"type\":\"tier_not_allowed\",\"param\":null,\"code\":\"1910\",\"raw_status_code\":403}"
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-08-29T12:53:31.821Z",
+        "durationMs": 5221,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Jordan Bardella\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"Strong National Rally performance in 2024 EU elections and youth appeal make him current polling favorite.\"\n}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "Strong National Rally performance in 2024 EU elections and youth appeal make him current polling favorite.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-08-29T12:53:31.821Z",
+        "durationMs": 9137,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"National Rally has led recent first-round polling, and Marine Le Pen’s legal jeopardy could make Bardella its nominee.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "National Rally has led recent first-round polling, and Marine Le Pen’s legal jeopardy could make Bardella its nominee.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-08-29T12:53:31.823Z",
+        "durationMs": 5254,
+        "ok": true,
+        "raw": "{\"candidate\": \"Édouard Philippe\", \"confidence\": \"low\", \"reasoning\": \"He has consistently led favorability polls among likely contenders and could consolidate the centrist-right vote against Marine Le Pen (or her replacement Jordan Bardella) in a runoff.\"}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently led favorability polls among likely contenders and could consolidate the centrist-right vote against Marine Le Pen (or her replacement Jordan Bardella) in a runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
