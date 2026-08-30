@@ -80,12 +80,21 @@ async function callOpenAICompat({ url, apiKey, model, prompt, extraHeaders = {},
   return text;
 }
 
+// ── Mistral ─────────────────────────────────────────────────────────────────
+// Pinned to a DATED id, not the `-latest` alias. On 2026-08-27 Mistral retired
+// the model behind `mistral-large-latest` (2411 now returns "Invalid model")
+// and repointed the alias at mistral-large-2512, which is gated behind a paid
+// tier. Result: two days of 503s during the migration, then a hard
+// 403 tier_not_allowed, with no code change on our side. A dated id can't
+// silently move underneath us like that.
+// mistral-medium-2604 (Medium 3.5) is the strongest model this account's tier
+// allows. Verified working with json mode on 2026-08-30.
 async function callMistral(apiKey, prompt, opts = {}) {
   return callOpenAICompat({
     ...opts,
     url: 'https://api.mistral.ai/v1/chat/completions',
     apiKey,
-    model: 'mistral-large-latest',
+    model: 'mistral-medium-2604',
     prompt,
     jsonMode: true,
   });
@@ -200,7 +209,7 @@ export const providers = [
   {
     id: 'mistral',
     name: 'Mistral',
-    model: 'mistral-large-latest',
+    model: 'mistral-medium-2604',
     envKey: 'MISTRAL_API_KEY',
     call: callMistral,
   },

@@ -69,6 +69,12 @@ const MODEL_SWITCHES = [
     labelKey: 'prompt_switch_label',
     label: 'Prompt simplified',
   },
+  {
+    date: '2026-08-30',
+    providers: ['mistral'],
+    labelKey: 'mistral_switch_label',
+    label: 'Mistral Large → Medium 3.5',
+  },
 ];
 
 // ── Wikipedia image fetching with in-memory + localStorage cache ─────
