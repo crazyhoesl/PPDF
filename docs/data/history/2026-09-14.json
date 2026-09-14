@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-09-14T14:16:11.586Z",
+    "date": "2026-09-14",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-09-14T14:15:54.934Z",
+        "durationMs": 10200,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks as one of France's most popular politicians and is strongly positioned to unite the center-right and benefit from the republican front in a second-round runoff.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks as one of France's most popular politicians and is strongly positioned to unite the center-right and benefit from the republican front in a second-round runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-medium-2604",
+        "timestamp": "2026-09-14T14:15:54.960Z",
+        "durationMs": 2887,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-09-14T14:15:54.961Z",
+        "durationMs": 5291,
+        "ok": true,
+        "raw": "{\"candidate\": \"Marine Le Pen\", \"confidence\": \"low\", \"reasoning\": \"National Rally's strong 2024 legislative showing positions her as the leading opposition contender against a fragmented center.\"}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "National Rally's strong 2024 legislative showing positions her as the leading opposition contender against a fragmented center.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-09-14T14:15:54.962Z",
+        "durationMs": 16624,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"National Rally has led recent national polling, giving its likely nominee the strongest starting position.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "National Rally has led recent national polling, giving its likely nominee the strongest starting position.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-09-14T14:15:54.964Z",
+        "durationMs": 4265,
+        "ok": true,
+        "raw": "{\"candidate\": \"Édouard Philippe\", \"confidence\": \"low\", \"reasoning\": \"He has consistently led favorability and second-round polling among likely candidates, especially if Marine Le Pen remains barred by her conviction.\"}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently led favorability and second-round polling among likely candidates, especially if Marine Le Pen remains barred by her conviction.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
