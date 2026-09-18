@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-09-18T12:17:23.623Z",
+    "date": "2026-09-18",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-09-18T12:17:15.247Z",
+        "durationMs": 8376,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks as one of France's most popular politicians and is well-positioned to unite the centrist and center-right electorate in a second-round runoff against the far-right.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks as one of France's most popular politicians and is well-positioned to unite the centrist and center-right electorate in a second-round runoff against the far-right.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-medium-2604",
+        "timestamp": "2026-09-18T12:17:15.273Z",
+        "durationMs": 3060,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-09-18T12:17:15.274Z",
+        "durationMs": 6304,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"Bardella leads current French presidential polls for 2027 as the National Rally's standard-bearer after strong 2024 European election results.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "Bardella leads current French presidential polls for 2027 as the National Rally's standard-bearer after strong 2024 European election results.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-09-18T12:17:15.275Z",
+        "durationMs": 7082,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"His National Rally leadership and consistently strong first-round polling give him the clearest path to the runoff.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "His National Rally leadership and consistently strong first-round polling give him the clearest path to the runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-09-18T12:17:15.276Z",
+        "durationMs": 3796,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"With Marine Le Pen facing an ineligibility ruling, Bardella leads first-round polls amid the RN's sustained momentum and Macron being term-limited.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "With Marine Le Pen facing an ineligibility ruling, Bardella leads first-round polls amid the RN's sustained momentum and Macron being term-limited.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
