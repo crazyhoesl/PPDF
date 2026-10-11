@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-10-11T14:12:27.400Z",
+    "date": "2026-10-11",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-10-11T14:12:16.665Z",
+        "durationMs": 10735,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently polls as one of France's most popular politicians and is well-positioned to unite center and center-right voters in a likely second-round runoff against the far-right.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently polls as one of France's most popular politicians and is well-positioned to unite center and center-right voters in a likely second-round runoff against the far-right.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-medium-2604",
+        "timestamp": "2026-10-11T14:12:16.689Z",
+        "durationMs": 3191,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-10-11T14:12:16.690Z",
+        "durationMs": 5485,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"National Rally's strong recent polling performance positions its leader as frontrunner in France's polarized electorate.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "National Rally's strong recent polling performance positions its leader as frontrunner in France's polarized electorate.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-10-11T14:12:16.691Z",
+        "durationMs": 6513,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"medium\",\"reasoning\":\"He has led first-round polling as the likely National Rally candidate while the centrist and left-wing fields remain fragmented.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "medium",
+        "reasoning": "He has led first-round polling as the likely National Rally candidate while the centrist and left-wing fields remain fragmented.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-10-11T14:12:16.693Z",
+        "durationMs": 3311,
+        "ok": true,
+        "raw": "{\"candidate\": \"Edouard Philippe\", \"confidence\": \"low\", \"reasoning\": \"He has consistently led favorability polls among likely contenders and could consolidate centrist and center-right votes against a Rassemblement National candidate in a runoff.\"}",
+        "candidate": "Edouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently led favorability polls among likely contenders and could consolidate centrist and center-right votes against a Rassemblement National candidate in a runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
