@@ -1,0 +1,89 @@
+[
+  {
+    "timestamp": "2026-10-28T14:08:57.610Z",
+    "date": "2026-10-28",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-10-28T14:08:48.780Z",
+        "durationMs": 2880,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 429: {\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota ex"
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-medium-2604",
+        "timestamp": "2026-10-28T14:08:48.806Z",
+        "durationMs": 3047,
+        "ok": false,
+        "raw": null,
+        "candidate": null,
+        "candidate_id": null,
+        "confidence": null,
+        "reasoning": null,
+        "source": null,
+        "match_confidence": null,
+        "error": "HTTP 429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-10-28T14:08:48.807Z",
+        "durationMs": 8803,
+        "ok": true,
+        "raw": "{\"candidate\": \"Marine Le Pen\", \"confidence\": \"low\", \"reasoning\": \"Le Pen heads the main opposition party with consistent second-round polling strength against any centrist successor.\"}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "Le Pen heads the main opposition party with consistent second-round polling strength against any centrist successor.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-10-28T14:08:48.808Z",
+        "durationMs": 5365,
+        "ok": true,
+        "raw": "{\"candidate\":\"Édouard Philippe\",\"confidence\":\"low\",\"reasoning\":\"His comparatively broad center-right appeal could unite anti-RN voters in a runoff.\"}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "His comparatively broad center-right appeal could unite anti-RN voters in a runoff.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-10-28T14:08:48.809Z",
+        "durationMs": 3122,
+        "ok": true,
+        "raw": "{\"candidate\": \"Edouard Philippe\", \"confidence\": \"low\", \"reasoning\": \"He has consistently led favorability polls among likely candidates and could consolidate the center-right vote in a runoff against Marine Le Pen or Jordan Bardella.\"}",
+        "candidate": "Edouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He has consistently led favorability polls among likely candidates and could consolidate the center-right vote in a runoff against Marine Le Pen or Jordan Bardella.",
+        "source": "json",
+        "match_confidence": "exact",
+        "error": null
+      }
+    ]
+  }
+]
