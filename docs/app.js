@@ -422,7 +422,8 @@ function renderLatest(snapshot) {
       <div class="provider-head">
         <div class="provider-meta">
           <div class="provider-name">${escapeHtml(r.name)}</div>
-          <div class="provider-model">${escapeHtml(r.model || '')}</div>
+          <div class="provider-model" title="${escapeHtml(r.model || '')}">${escapeHtml(r.model || '')}</div>
+          ${r.ok && r.route === 'openrouter' ? `<div class="provider-route" title="${escapeHtml(r.direct_error || '')}">via OpenRouter</div>` : ''}
         </div>
         <div class="provider-status ${statusClass}">${statusLabel}</div>
       </div>
@@ -904,7 +905,7 @@ function showDetail(snap, result) {
   box.hidden = false;
   box.innerHTML = `
     <div class="td-head">
-      <span>${escapeHtml(result.name)} · <span class="td-model">${escapeHtml(result.model || '')}</span></span>
+      <span>${escapeHtml(result.name)} · <span class="td-model">${escapeHtml(result.model || '')}</span>${result.route === 'openrouter' ? ' · via OpenRouter' : ''}</span>
       <span>${fmt.format(new Date(snap.timestamp))}</span>
     </div>
     <div class="td-candidate">
