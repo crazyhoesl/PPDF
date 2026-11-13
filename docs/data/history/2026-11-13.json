@@ -95,5 +95,102 @@
         "error": null
       }
     ]
+  },
+  {
+    "timestamp": "2026-11-13T15:31:41.134Z",
+    "date": "2026-11-13",
+    "prompt": "Task: Pick the single most likely winner of the 2027 French presidential election.\n\nCommit to ONE name.\n\nGround rules:\n- Give ONE name, even if confidence is low. A low-confidence guess is the right answer when you're uncertain — not a refusal.\n- \"Unknown\" is ONLY acceptable if you literally have no knowledge of French politics (virtually never true for a modern LLM). Do not use it as an escape hatch.\n- Do not add disclaimers, warnings, or prose outside the JSON.\n\nRespond with valid JSON only:\n{\"candidate\": \"Full Name\", \"confidence\": \"low\" | \"medium\" | \"high\", \"reasoning\": \"one concise sentence citing one concrete factor\"}",
+    "results": [
+      {
+        "provider": "gemini",
+        "name": "Google Gemini",
+        "model": "gemini-3.1-pro-preview",
+        "timestamp": "2026-11-13T15:31:26.189Z",
+        "durationMs": 14945,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Édouard Philippe\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"He consistently ranks as one of the most popular political figures in France in recent opinion polls, providing a strong baseline for the center-right as Macron is term-limited.\"\n}",
+        "candidate": "Édouard Philippe",
+        "candidate_id": "philippe",
+        "confidence": "low",
+        "reasoning": "He consistently ranks as one of the most popular political figures in France in recent opinion polls, providing a strong baseline for the center-right as Macron is term-limited.",
+        "source": "json",
+        "match_confidence": "exact",
+        "route": "openrouter",
+        "direct_error": "HTTP 429: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro, description: Generate content input tokens per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits. * Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_fre",
+        "error": null
+      },
+      {
+        "provider": "mistral",
+        "name": "Mistral",
+        "model": "mistral-medium-2604",
+        "timestamp": "2026-11-13T15:31:26.215Z",
+        "durationMs": 4325,
+        "ok": true,
+        "raw": "{\"candidate\": \"Gabriel Attal\", \"confidence\": \"medium\", \"reasoning\": \"Current Prime Minister with rising popularity and youthful appeal in a fragmented political landscape.\"}",
+        "candidate": "Gabriel Attal",
+        "candidate_id": "attal",
+        "confidence": "medium",
+        "reasoning": "Current Prime Minister with rising popularity and youthful appeal in a fragmented political landscape.",
+        "source": "json",
+        "match_confidence": "exact",
+        "route": "openrouter",
+        "direct_error": "HTTP 429: Rate limit exceeded [1300]",
+        "error": null
+      },
+      {
+        "provider": "grok",
+        "name": "xAI Grok",
+        "model": "grok-4-1-fast-reasoning",
+        "timestamp": "2026-11-13T15:31:26.216Z",
+        "durationMs": 13597,
+        "ok": true,
+        "raw": "{\n  \"candidate\": \"Marine Le Pen\",\n  \"confidence\": \"low\",\n  \"reasoning\": \"Her repeated strong showings in prior presidential runoffs establish her as the leading opposition figure for 2027.\"\n}",
+        "candidate": "Marine Le Pen",
+        "candidate_id": "lepen",
+        "confidence": "low",
+        "reasoning": "Her repeated strong showings in prior presidential runoffs establish her as the leading opposition figure for 2027.",
+        "source": "json",
+        "match_confidence": "exact",
+        "route": "direct",
+        "direct_error": null,
+        "error": null
+      },
+      {
+        "provider": "openai",
+        "name": "OpenAI",
+        "model": "gpt-5.6-sol",
+        "timestamp": "2026-11-13T15:31:26.217Z",
+        "durationMs": 8893,
+        "ok": true,
+        "raw": "{\"candidate\":\"Jordan Bardella\",\"confidence\":\"low\",\"reasoning\":\"He is well placed to inherit the National Rally candidacy, with the party leading many early 2027 polls.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "He is well placed to inherit the National Rally candidacy, with the party leading many early 2027 polls.",
+        "source": "json",
+        "match_confidence": "exact",
+        "route": "openrouter",
+        "direct_error": "HTTP 429: You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/. [credit_balance_exhausted]",
+        "error": null
+      },
+      {
+        "provider": "claude",
+        "name": "Anthropic Claude",
+        "model": "claude-fable-5",
+        "timestamp": "2026-11-13T15:31:26.218Z",
+        "durationMs": 3010,
+        "ok": true,
+        "raw": "{\"candidate\": \"Jordan Bardella\", \"confidence\": \"low\", \"reasoning\": \"The RN leads first-round polling and Bardella is its likely candidate given Le Pen's legal ineligibility, though runoff dynamics make the outcome highly uncertain.\"}",
+        "candidate": "Jordan Bardella",
+        "candidate_id": "bardella",
+        "confidence": "low",
+        "reasoning": "The RN leads first-round polling and Bardella is its likely candidate given Le Pen's legal ineligibility, though runoff dynamics make the outcome highly uncertain.",
+        "source": "json",
+        "match_confidence": "exact",
+        "route": "direct",
+        "direct_error": null,
+        "error": null
+      }
+    ]
   }
 ]
