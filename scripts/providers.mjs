@@ -4,6 +4,26 @@
 //   model    — the specific model name used
 //   envKey   — name of the environment variable holding the API key
 //   call(apiKey, prompt, { timeoutMs }) → string (raw model text response)
+//   openrouter (optional) — { model, params } for the OpenRouter fallback,
+//              see callOpenRouter() below and runProvider() in poll.mjs.
+
+/**
+ * Turn an error response body into one readable line. Providers wrap the
+ * actual cause in JSON (`{error: {message}}` or `{message}`); the raw body
+ * used to be cut at 300 chars, which on Gemini hid exactly the part that
+ * mattered ("…free_tier_requests, limit: 0, model: gemini-3.1-pro").
+ */
+function describeErrorBody(text) {
+  let msg = text;
+  try {
+    const j = JSON.parse(text);
+    const e = j?.error ?? j;
+    msg = (typeof e === 'string' ? e : e?.message) || text;
+    const code = typeof e === 'object' ? (e?.code ?? e?.type) : null;
+    if (code && typeof code === 'string' && !msg.includes(code)) msg += ` [${code}]`;
+  } catch {}
+  return String(msg).replace(/\s+/g, ' ').trim().slice(0, 600);
+}
 
 async function fetchWithTimeout(url, opts, timeoutMs = 30_000) {
   const ac = new AbortController();
@@ -12,7 +32,7 @@ async function fetchWithTimeout(url, opts, timeoutMs = 30_000) {
     const res = await fetch(url, { ...opts, signal: ac.signal });
     const text = await res.text();
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${text.slice(0, 300)}`);
+      throw new Error(`HTTP ${res.status}: ${describeErrorBody(text)}`);
     }
     try { return JSON.parse(text); } catch { return text; }
   } catch (err) {
@@ -198,6 +218,41 @@ async function callClaude(apiKey, prompt, { timeoutMs } = {}) {
   return text;
 }
 
+// ── OpenRouter fallback ─────────────────────────────────────────────────────
+// Used only when the direct call to a provider fails. Same model, different
+// billing path: OpenRouter is prepaid (OPENROUTER_API_KEY) and forwards to
+// the original vendor, so the answer still comes from the same model.
+// Why it exists (state 2026-11-13, all three failing daily with HTTP 429):
+//   - Gemini: Google set the free-tier quota for gemini-3.1-pro to 0
+//     (since 2026-10-19). Flash models stay free, Pro needs billing.
+//   - Mistral: the account's plan returns x-ratelimit-limit-req-minute=0 on
+//     EVERY model (since 2026-09-04) — not a real rate limit, a lapsed plan.
+//   - OpenAI: credit_balance_exhausted (since 2026-11-01).
+// Cost via OpenRouter, measured: ~$0.015/day for all three together.
+async function callOpenRouter(apiKey, { model, params = {} }, prompt, { timeoutMs } = {}) {
+  const data = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'X-Title': 'PPDF',
+    },
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], ...params }),
+  }, timeoutMs);
+  // OpenRouter can return HTTP 200 with an error object when the upstream
+  // vendor fails mid-request.
+  if (data?.error) throw new Error(`openrouter: ${describeErrorBody(JSON.stringify(data))}`);
+  const text = data?.choices?.[0]?.message?.content;
+  const finishReason = data?.choices?.[0]?.finish_reason;
+  if (!text) throw new Error(`openrouter: empty response (finish_reason: ${finishReason || 'unknown'})`);
+  return text;
+}
+
+export const openrouter = {
+  envKey: 'OPENROUTER_API_KEY',
+  call: callOpenRouter,
+};
+
 export const providers = [
   {
     id: 'gemini',
@@ -205,6 +260,11 @@ export const providers = [
     model: 'gemini-3.1-pro-preview',
     envKey: 'GEMINI_API_KEY',
     call: callGemini,
+    openrouter: {
+      model: 'google/gemini-3.1-pro-preview',
+      // Mirrors the direct call: temperature 0, medium thinking.
+      params: { max_tokens: 8000, temperature: 0, response_format: { type: 'json_object' }, reasoning: { effort: 'medium' } },
+    },
   },
   {
     id: 'mistral',
@@ -212,6 +272,11 @@ export const providers = [
     model: 'mistral-medium-2604',
     envKey: 'MISTRAL_API_KEY',
     call: callMistral,
+    openrouter: {
+      // mistral-medium-2604 is Medium 3.5 — OpenRouter's id for the same model.
+      model: 'mistralai/mistral-medium-3-5',
+      params: { max_tokens: 800, temperature: 0, response_format: { type: 'json_object' } },
+    },
   },
   {
     id: 'grok',
@@ -226,6 +291,10 @@ export const providers = [
     model: 'gpt-5.6-sol',
     envKey: 'OPENAI_API_KEY',
     call: callOpenAI,
+    openrouter: {
+      model: 'openai/gpt-5.6-sol',
+      params: { max_tokens: 2000, response_format: { type: 'json_object' } },
+    },
   },
   {
     id: 'claude',

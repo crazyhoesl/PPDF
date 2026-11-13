@@ -459,6 +459,12 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.provider-route {
+  font-size: 0.62rem;
+  color: var(--fg-dimmer);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .provider-status {
   font-size: 0.7rem;
   padding: 2px 8px;
@@ -572,6 +578,9 @@ main {
   color: #f87171;
   font-size: 0.82rem;
   font-weight: 300;
+  /* Provider errors carry long URLs and JSON tokens with no break points;
+     without this they run out of the card into the neighbouring one. */
+  overflow-wrap: anywhere;
 }
 
 /* ─── Consensus chart (Polymarket-style multi-line) ──────────────── */

@@ -41,17 +41,28 @@ GitHub Pages : **[crazyhoesl.github.io/PPDF](https://crazyhoesl.github.io/PPDF/)
 
 ## Providers
 
-Tous ont un **free tier** généreux, sans carte de crédit :
+État au 13/11/2026 (la source de vérité reste `scripts/providers.mjs`) :
 
-| Provider    | Model                       | Secret name          | Sign up |
-|-------------|-----------------------------|----------------------|---------|
-| Google Gemini | `gemini-2.5-flash`        | `GEMINI_API_KEY`     | [aistudio.google.com](https://aistudio.google.com/apikey) |
-| Mistral     | `mistral-large-latest`      | `MISTRAL_API_KEY`    | [console.mistral.ai](https://console.mistral.ai/api-keys) |
-| Groq        | `llama-3.3-70b-versatile`   | `GROQ_API_KEY`       | [console.groq.com](https://console.groq.com/keys) |
-| OpenAI      | `gpt-5.4` (flagship)        | `OPENAI_API_KEY`     | [platform.openai.com](https://platform.openai.com/api-keys) |
-| Anthropic   | `claude-opus-4-7` (flagship)| `CLAUDE_API_KEY`     | [console.anthropic.com](https://console.anthropic.com/) |
+| Provider      | Model                      | Secret name       | Repli OpenRouter                  |
+|---------------|----------------------------|-------------------|-----------------------------------|
+| Google Gemini | `gemini-3.1-pro-preview`   | `GEMINI_API_KEY`  | `google/gemini-3.1-pro-preview`   |
+| Mistral       | `mistral-medium-2604`      | `MISTRAL_API_KEY` | `mistralai/mistral-medium-3-5`    |
+| xAI Grok      | `grok-4-1-fast-reasoning`  | `XAI_API_KEY`     | —                                 |
+| OpenAI        | `gpt-5.6-sol`              | `OPENAI_API_KEY`  | `openai/gpt-5.6-sol`              |
+| Anthropic     | `claude-fable-5`           | `CLAUDE_API_KEY`  | —                                 |
 
-Si un secret manque, le provider est simplement sauté (aucun crash). Ajouter les secrets sous `Settings → Secrets and variables → Actions`.
+Si un secret manque et qu'il n'y a pas de repli, le provider est simplement sauté (aucun crash). Ajouter les secrets sous `Settings → Secrets and variables → Actions`.
+
+### Repli via OpenRouter
+
+Chaque provider est d'abord interrogé **directement**. Si l'appel échoue (quota, crédit, panne), le même prompt part vers le **même modèle via OpenRouter** (`OPENROUTER_API_KEY`, crédit prépayé). Le résultat note la route (`route: "direct" | "openrouter"`) et, le cas échéant, l'erreur directe (`direct_error`) ; le site affiche « via OpenRouter » sur la carte.
+
+Pourquoi : depuis l'automne 2026, trois comptes directs échouent chaque jour en HTTP 429 —
+- **Gemini** : Google a mis le quota gratuit de `gemini-3.1-pro` à 0 (depuis le 19/10). Les modèles Flash restent gratuits, Pro exige la facturation.
+- **Mistral** : le compte renvoie `x-ratelimit-limit-req-minute=0` sur **tous** les modèles (depuis le 04/09) — ce n'est pas une vraie limite de débit, le plan a expiré.
+- **OpenAI** : `credit_balance_exhausted` (depuis le 01/11).
+
+Coût mesuré via OpenRouter : environ 0,015 $ par jour pour les trois. Dès qu'un compte direct refonctionne, la route directe reprend d'elle-même.
 
 ## Structure du repo
 

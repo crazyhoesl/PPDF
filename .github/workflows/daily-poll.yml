@@ -34,6 +34,8 @@ jobs:
           XAI_API_KEY:        ${{ secrets.XAI_API_KEY }}
           OPENAI_API_KEY:     ${{ secrets.OPENAI_API_KEY }}
           CLAUDE_API_KEY:     ${{ secrets.CLAUDE_API_KEY }}
+          # Fallback when a direct call fails (see scripts/providers.mjs)
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: node scripts/poll.mjs
 
       - name: Commit & push

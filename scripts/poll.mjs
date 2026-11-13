@@ -7,7 +7,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeCandidate, scanProseForCandidate, looksLikeNoOpinion } from './candidates.mjs';
-import { providers } from './providers.mjs';
+import { providers, openrouter } from './providers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -120,6 +120,34 @@ function interpret(rawText) {
   return null; // hard failure — caller marks as error
 }
 
+/**
+ * Run fn once more on network/5xx/429 failures.
+ * HTTP 401 is also retried once: normally auth failures are permanent, but
+ * OpenAI has been observed returning transient 401 "insufficient
+ * permissions" during internal auth-service blips (seen 2026-07-14 — the
+ * same key succeeded minutes later). One retry with a longer backoff
+ * costs nothing and self-heals those runs; a genuinely bad key still
+ * fails after the second attempt.
+ */
+async function withRetry(fn) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const msg = String(err?.message ?? '');
+      const retriable = /HTTP 5\d\d|HTTP 429|HTTP 401|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
+      if (attempt === 1 && retriable) {
+        // Backoff: 4s for 401 (auth blips need a moment), 2.5s for 429,
+        // 1.5s otherwise
+        const delay = /401/.test(msg) ? 4000 : /429/.test(msg) ? 2500 : 1500;
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 async function runProvider(provider) {
   const started = Date.now();
   const result = {
@@ -136,47 +164,35 @@ async function runProvider(provider) {
     reasoning: null,
     source: null,              // "json" | "prose" | "no_opinion_marker"
     match_confidence: null,    // "exact" | "substring" | "none"
+    route: null,               // "direct" | "openrouter" — which path answered
+    direct_error: null,        // why the direct call failed, when route = "openrouter"
     error: null,
   };
 
   try {
-    const envKey = provider.envKey;
-    const apiKey = process.env[envKey];
-    if (!apiKey) {
-      result.error = `missing env ${envKey}`;
-      result.durationMs = Date.now() - started;
-      return result;
-    }
+    const apiKey = process.env[provider.envKey];
+    const orKey = provider.openrouter ? process.env[openrouter.envKey] : null;
 
-    // 30-second hard timeout per provider, with one retry on network/5xx/429.
-    // HTTP 401 is also retried once: normally auth failures are permanent, but
-    // OpenAI has been observed returning transient 401 "insufficient
-    // permissions" during internal auth-service blips (seen 2026-07-14 — the
-    // same key succeeded minutes later). One retry with a longer backoff
-    // costs nothing and self-heals those runs; a genuinely bad key still
-    // fails after the second attempt.
+    // Direct to the vendor first (30 s, one retry). If that fails for any
+    // reason and the provider has an OpenRouter mapping, ask the same model
+    // through OpenRouter. Once a vendor account works again, the direct
+    // route takes over by itself — no code change needed.
     let text = null;
-    let lastErr = null;
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      if (!apiKey) throw new Error(`missing env ${provider.envKey}`);
+      text = await withRetry(() => provider.call(apiKey, PROMPT, { timeoutMs: 30_000 }));
+      result.route = 'direct';
+    } catch (directErr) {
+      if (!orKey) throw directErr;
+      result.direct_error = String(directErr?.message ?? directErr).slice(0, 600);
       try {
-        text = await provider.call(apiKey, PROMPT, { timeoutMs: 30_000 });
-        lastErr = null;
-        break;
-      } catch (err) {
-        lastErr = err;
-        const msg = String(err?.message ?? '');
-        const retriable = /HTTP 5\d\d|HTTP 429|HTTP 401|ETIMEDOUT|ECONNRESET|fetch failed|abort|timeout/i.test(msg);
-        if (attempt === 1 && retriable) {
-          // Backoff: 4s for 401 (auth blips need a moment), 2.5s for 429,
-          // 1.5s otherwise
-          const delay = /401/.test(msg) ? 4000 : /429/.test(msg) ? 2500 : 1500;
-          await new Promise(r => setTimeout(r, delay));
-          continue;
-        }
-        throw err;
+        // Longer timeout: Gemini Pro via OpenRouter took ~15 s in testing.
+        text = await withRetry(() => openrouter.call(orKey, provider.openrouter, PROMPT, { timeoutMs: 60_000 }));
+      } catch (orErr) {
+        throw new Error(`${result.direct_error} · OpenRouter: ${orErr?.message ?? orErr}`);
       }
+      result.route = 'openrouter';
     }
-    if (lastErr) throw lastErr;
 
     result.raw = typeof text === 'string' ? text.slice(0, 4000) : JSON.stringify(text).slice(0, 4000);
 
@@ -195,7 +211,7 @@ async function runProvider(provider) {
     result.match_confidence = interpreted.match_confidence;
     result.ok = true;
   } catch (err) {
-    result.error = String(err?.message ?? err).slice(0, 400);
+    result.error = String(err?.message ?? err).slice(0, 1200);
   }
 
   result.durationMs = Date.now() - started;
@@ -214,7 +230,8 @@ async function main() {
       ? (r.candidate_id === 'no_opinion' ? '○' : r.candidate_id === 'unknown' ? '?' : '✓')
       : '✗';
     const body = r.ok
-      ? `${r.candidate}  [src:${r.source} match:${r.match_confidence}]`
+      ? `${r.candidate}  [src:${r.source} match:${r.match_confidence} via:${r.route}]`
+        + (r.direct_error ? `\n      direct failed: ${r.direct_error}` : '')
       : r.error;
     console.log(`  ${icon} ${r.provider.padEnd(12)} → ${body}  (${r.durationMs}ms)`);
   }
